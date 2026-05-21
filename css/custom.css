@@ -503,7 +503,7 @@ html {
 .data-exp-frame {
   display: block;
   width: 100%;
-  height: 390px;
+  height: 340px;
   border: 0;
   border-radius: 10px;
   background: #f8fafc;
@@ -711,6 +711,6 @@ html {
   }
 
   .data-exp-frame {
-    height: 620px;
+    height: 560px;
   }
 }
