@@ -4,6 +4,43 @@
   
     
     <entry>
+      <title>DeepSeek 辅助标准字典全量实验报告</title>
+      <link href="/2026/05/21/DataEngine/deepseek-llm-dictionary-full-report/"/>
+      <url>/2026/05/21/DataEngine/deepseek-llm-dictionary-full-report/</url>
+      
+        
+        <content type="html"><![CDATA[这轮实验想回答一个很具体的问题：在数据中台资源检索场景里，标准字典和关系字典已经能扩大召回，但也会带来噪声；如果把 DeepSeek 放进流程，让它先判断候选概念和候选关系是否真的服务于当前问题，最终检索质量会不会更稳。 本文保留实验流程、指标和结论，但对本地路径、产物路径、样本 ID、真实业务系统名和真实表名做了脱敏处理。 一、实验目的 实验目标是验证“标准字典 + 关系字典 + 大模型判断”是否能提升数据提取和数据处理时的资源命中质量。 前一轮实验发现：全量候选字典可以覆盖更多业务概念和表字段，但自动生成的字典会引入噪声，导致标准字典和关系增强字典在部分排序指标上反而低于无字典检索。因此本轮把 DeepSeek 加入流程，用大模型对候选概念和候选关系做过滤，再重新评估检索结果。 本轮实验暂不包含人工确认，人工复核只作为下一轮实验准备。 二、实验对象 项目 说明 实验环境 隔离副本，不直接修改原项目 候选字典 全量标准字典 评测问题 100 条 实验模型 deepseek-v4-flash 生成时间 2026-05-21 18:19:16 100 条评测问题按类型均匀覆盖： 问题类型 数量 business 20 table 20 relation 20 field 20 alias 20 三、DeepSeek 放入的位置 本轮把 DeepSeek 放到三个位置： 候选概念判断：判断字典召回的直接业务概念是否适合当前问题。 候选关系判断：判断关系扩展出来的相关概念是否真有业务价值。 结果预判：对无字典、标准字典、关系增强字典、DeepSeek 辅助字典的结果做预判，给下一轮人工复核提供抽样依据。 flowchart LR Q["用户问题"] --> B["无字典检索"] Q --> D["标准字典召回候选概念"] D --> R["关系字典扩展候选关系"] D --> L1["DeepSeek 判断直接概念"] R --> L2["DeepSeek 判断关系概念"] L1 --> F["过滤后的概念集合"] L2 --> F F --> S["重新检索与排序"] B --> E["指标评估"] S --> E E --> L3["DeepSeek 结果预判"] L3 --> H["下一轮人工复核准备"] 四、对比模式 模式 含义 无字典 只使用原有关键词和工程检索逻辑 标准字典 使用标准字典扩展别名、同义词、字段关键词、优先表 关系增强字典 在标准字典基础上加入概念之间的关系扩展 DeepSeek 辅助字典 先由 DeepSeek 过滤候选概念和关系，再参与检索排序 五、评测指标 指标 含义 P@K Top K 结果里有多少比例是正确表 R@K 期望命中的表里，有多少比例出现在 Top K MRR 第一个正确结果越靠前越好，第一位命中为 1，第二位命中为 0.5 conceptRecall 期望直接概念中，有多少被字典召回 relationAccuracy 期望相关概念中，有多少被关系字典或关系证据覆盖 需要注意：本轮 expectedTables 、 expectedDirectConcepts 、 expectedRelatedConcepts 是伪金标，不等同于人工确认后的最终真值。 六、核心结果 模式 P@1 P@3 P@5 P@10 R@1 R@3 R@5 R@10 MRR 无字典 0.800 0.397 0.264 0.143 0.652 0.804 0.849 0.878 0.848 标准字典 0.790 0.333 0.210 0.127 0.652 0.733 0.746 0.789 0.822 关系增强字典 0.790 0.333 0.210 0.127 0.652 0.733 0.746 0.789 0.822 DeepSeek 辅助字典 0.860 0.403 0.266 0.158 0.714 0.847 0.862 0.899 0.887 概念和关系指标如下： 模式 conceptRecall relationAccuracy 标准字典 0.880 0.120 关系增强字典 0.880 0.860 DeepSeek 辅助字典 0.860 0.186 七、结果解读 DeepSeek 辅助字典的排序指标最好。相比无字典： P@1 从 0.800 提升到 0.860。 P@5 从 0.264 提升到 0.266。 R@5 从 0.849 提升到 0.862。 MRR 从 0.848 提升到 0.887。 这说明 DeepSeek 过滤后，正确表更容易排到前面，尤其是第一个正确结果的位置更靠前。 标准字典和关系增强字典的 P@5、R@5 低于无字典，主要原因是全量候选字典由工程规则自动生成，覆盖面更广，但也带来了噪声。噪声概念、弱相关关系、同域但不相关的表会影响排序。 关系增强字典的 relationAccuracy 最高，达到 0.860。这说明工程规则确实找出了很多“期望相关概念”。但它没有提升排序指标，说明“关系覆盖多”不等于“检索更准”。关系扩展如果不过滤，可能把太多相邻但不必要的概念带入排序。 DeepSeek 辅助字典的 relationAccuracy 只有 0.186，是因为它对关系概念更保守，平均每题只接受 0.23 个关系概念。虽然关系覆盖率下降，但排序指标提升，说明 DeepSeek 在这里更像一个噪声过滤器。 八、单条问题示例 下面选取一条差异比较明显的测试问题。为了避免暴露内部表结构，示例中的系统名、表名和样本 ID 都已经脱敏。 8.1 测试问题 某教学质量管理场景下，用户希望定位“学生期末评价完成状态”相关数据，并解释班级、姓名、学号、学生等字段含义。 期望命中两张目标表： target_table_a target_table_b 期望直接概念为： target_business_concept 8.2 四种模式指标 模式 P@1 P@5 R@5 MRR 说明 无字典 0.000 0.000 0.000 0.000 Top 5 没有命中任何期望表 标准字典 1.000 0.200 0.500 1.000 第 1 位命中 1 张期望表，但另一张期望表没进 Top 5 关系增强字典 1.000 0.200 0.500 1.000 与标准字典结果相同，关系扩展没有带来额外提升 DeepSeek 辅助字典 1.000 0.400 1.000 1.000 Top 2 同时命中两张期望表 8.3 Top 5 结果对比 无字典模式只靠关键词检索，容易被“学生”“班级”“姓名”等宽泛词带偏： 排名 是否命中 返回类型 表名 1 否 宽泛学生信息类 candidate_table_01 2 否 宽泛学生信息类 candidate_table_02 3 否 宽泛学生信息类 candidate_table_03 4 否 宽泛学生信息类 candidate_table_04 5 否 宽泛学生信息类 candidate_table_05 标准字典把“学生期末评价完成状态”对应概念召回了，所以第 1 位命中正确表。但它也引入了学生基本信息、人员基本信息、教学任务、课程、成绩等宽泛概念，后续排名仍被噪声影响： 排名 是否命中 返回类型 表名 1 是 目标业务表 target_table_b 2 否 教学组织信息 candidate_table_06 3 否 学生基础信息 candidate_table_07 4 否 学工相关信息 candidate_table_08 5 否 通用学生信息 candidate_table_09 关系增强字典在这个样本上的 Top 5 与标准字典一致，说明关系扩展没有帮助找到第二张期望表。 DeepSeek 辅助字典只接受了精确匹配的目标概念，拒绝了宽泛的学生基本信息、人员基本信息、课程、成绩等概念，因此两张期望表排到了前两位： 排名 是否命中 返回类型 表名 1 是 目标业务表 target_table_b 2 是 目标业务表 target_table_a 3 否 相邻学生信息 candidate_table_10 4 否 相邻学生信息 candidate_table_11 5 否 宽泛学生信息 candidate_table_12 8.4 这个例子说明什么 这个样本体现了本轮实验最重要的现象：标准字典可以扩大召回，但自动扩展容易混入“看起来相关、实际不够精确”的概念；DeepSeek 的作用不是简单增加召回，而是把候选概念和关系收窄到真正服务当前问题的范围内。 九、LLM 判定情况 项目 数值 平均接受直接概念数 1.36 平均接受关系概念数 0.23 LLM 任务错误数 0 LLM 阶段错误数 0 DeepSeek 对直接概念相对愿意保留，对关系概念明显更谨慎。这与实验现象一致：直接概念通常对问题更关键，关系概念更容易引入弱相关噪声。 十、DeepSeek 结果预判 DeepSeek 对四种模式的结果做了预判： 模式 pass partial fail 无字典 58 28 14 标准字典 33 47 20 关系增强字典 44 36 20 DeepSeek 辅助字典 50 38 12 这个预判不是人工结论，只能作为下一轮人工复核的抽样依据。它的价值在于帮助人更快找到值得检查的样本，例如： DeepSeek 辅助字典明显提升的样本。 标准字典引入后排序下降的样本。 关系增强字典关系覆盖很高，但排序没有提升的样本。 DeepSeek 判断为 fail 或 partial 的样本。 十一、实验结论 本轮实验说明： 全量候选字典覆盖面更广，但自动生成字典存在噪声。 只做关系扩展可以提高关系覆盖率，但不一定提高检索排序质量。 DeepSeek 可以作为概念和关系过滤器，减少噪声进入排序过程。 DeepSeek 辅助字典在本轮 100 条问题上取得最好的 P@1、P@5、R@5 和 MRR。 目前结果仍基于伪金标，下一步需要人工复核来确认概念、关系和结果预判是否真实可靠。 十二、下一轮人工参与实验建议 下一轮建议把人工复核页改成三个确认区： 概念确认：DeepSeek 接受的直接概念是否真的符合问题。 关系确认：DeepSeek 接受的关系概念是否真的有业务价值。 结果确认：DeepSeek 对检索结果 pass、partial、fail 的判断是否准确。 建议优先抽样： DeepSeek 辅助字典 P@5 高于无字典的样本。 标准字典或关系增强字典低于无字典的样本。 关系增强字典 relationAccuracy 高但 P@5 不高的样本。 DeepSeek 结果预判中 fail 的样本。 人工确认之后，可以把人工结论作为真实金标，再重新计算 Precision@K、Recall@K、MRR、conceptRecall 和 relationAccuracy。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 实验 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据中台 </tag>
+            
+            <tag> 标准字典 </tag>
+            
+            <tag> 数据治理 </tag>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> DeepSeek </tag>
+            
+            <tag> 实验 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>数据中台架构与标准字典实验说明</title>
       <link href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/"/>
       <url>/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/</url>
@@ -15,7 +52,7 @@
       
       <categories>
           
-          <category> 数据工程 </category>
+          <category> 实验 </category>
           
       </categories>
       
@@ -50,7 +87,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -81,7 +118,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -112,7 +149,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -143,7 +180,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -174,7 +211,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -205,7 +242,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
@@ -238,7 +275,7 @@
       
       <categories>
           
-          <category> 论文解读 </category>
+          <category> 数据工程 </category>
           
       </categories>
       
