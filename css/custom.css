@@ -644,24 +644,6 @@ html {
   font-weight: 800;
 }
 
-.paper-article-inline .tabs,
-.paper-article-inline .segmented,
-.paper-article-inline .domain-tabs,
-.paper-article-inline [data-chart-switch],
-.paper-article-inline [data-domain-tab] {
-  display: none !important;
-}
-
-.paper-article-inline .tab-panel,
-.paper-article-inline .domain-pane,
-.paper-article-inline [data-domain-pane],
-.paper-article-inline .panel,
-.paper-article-inline .reveal {
-  display: block !important;
-  opacity: 1 !important;
-  transform: none !important;
-}
-
 .data-exp-sandbox {
   margin: 1.2rem 0 1.6rem;
   border: 1px solid rgba(148, 163, 184, 0.26);
