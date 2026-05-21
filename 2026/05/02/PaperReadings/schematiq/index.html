@@ -1,0 +1,488 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>ScheMatiQ: 从研究问题到可验证数据表 | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="arXiv:2604.09237 · 2026-04-10 · Document AI &#x2F; Data Mining从一个研究问题，到一张可验证的数据表。ScheMatiQ 解决的是一个很现实的问题：研究者面对一堆长文档时，真正想要的往往不是一段摘要，而是一张能分析、能检查、能追溯证据的数据表。arXiv 论文项目网站法律 + 计算生物学双用例Gemini-2.5 系列89法律领域：美国移民 in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ScheMatiQ: 从研究问题到可验证数据表">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/02/PaperReadings/schematiq/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="arXiv:2604.09237 · 2026-04-10 · Document AI &#x2F; Data Mining从一个研究问题，到一张可验证的数据表。ScheMatiQ 解决的是一个很现实的问题：研究者面对一堆长文档时，真正想要的往往不是一段摘要，而是一张能分析、能检查、能追溯证据的数据表。arXiv 论文项目网站法律 + 计算生物学双用例Gemini-2.5 系列89法律领域：美国移民 in">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-02T09:34:09.000Z">
+<meta property="article:modified_time" content="2026-05-20T12:42:58.835Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="结构化数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/02/PaperReadings/schematiq/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'ScheMatiQ: 从研究问题到可验证数据表',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-20 20:42:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ScheMatiQ: 从研究问题到可验证数据表</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-02T09:34:09.000Z" title="发表于 2026-05-02 17:34:09">2026-05-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-20T12:42:58.835Z" title="更新于 2026-05-20 20:42:58">2026-05-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">4.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="ScheMatiQ: 从研究问题到可验证数据表"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-schematiq">
+<header class="hero" id="overview"><div><div class="eyebrow">arXiv:2604.09237 · 2026-04-10 · Document AI / Data Mining</div><h2 class="paper-main-title">从一个研究问题，到一张可验证的数据表。</h2><p class="subtitle">ScheMatiQ 解决的是一个很现实的问题：研究者面对一堆长文档时，真正想要的往往不是一段摘要，而是一张能分析、能检查、能追溯证据的数据表。</p><div><a class="pill" target="_blank" rel="noopener" href="https://arxiv.org/abs/2604.09237">arXiv 论文</a><a class="pill" target="_blank" rel="noopener" href="https://www.ScheMatiQ-ai.com">项目网站</a><span class="pill">法律 + 计算生物学双用例</span><span class="pill">Gemini-2.5 系列</span></div><div class="metrics"><div><strong>89</strong><span>法律领域：美国移民 injunction court decisions</span></div><div><strong>96 / 110</strong><span>计算生物学语料数量在正文与 Appendix 中存在口径差异</span></div><div><strong>$1 / 100 docs</strong><span>作者报告两个用例的大致处理成本</span></div><div><strong>87% / 74%</strong><span>protein / judge observation-unit recall，测试样例 precision 为 100%</span></div></div></div><div class="device"><div class="screen"><div class="screenbar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div><div class="workflow"><div class="flow"><b>1. Observation Unit Discovery</b><div class="mono">query + documents → {"type":"Judge", "row":"one judge in one case"}</div></div><div class="flow"><b>2. Schema Discovery</b><div class="mono">iterative batches → fields, definitions, rationale, allowed values</div></div><div class="flow"><b>3. Structured Data Extraction</b><div class="mono">rows × columns → value + supporting evidence + expert edits</div></div><div class="flow"><b>一句话讲清</b><div class="mono">它让 LLM 先帮你设计“这张研究表应该长什么样”，再去抽取数据。</div></div></div></div></div></header>
+<main>
+
+
+<section id="motivation"><h2 class="title">研究动机：Deep Research 不等于可分析数据</h2><p class="lead">论文抓住了一个很容易被忽略的问题：很多研究不是要“读完文档写总结”，而是要把文档变成一张能继续分析的数据表。</p><div class="grid"><div class="card s4"><h3>传统流程慢</h3><p>专家先设计 annotation schema，再让研究助理逐篇标注。这一步需要领域知识、语料熟悉度和大量人工时间，且会受到人类预设、遗漏变量、标注不一致的影响。</p></div><div class="card s4"><h3>现有 LLM 工具偏检索</h3><p>很多 “deep research” 系统擅长找资料和总结，但不擅长穷尽处理 corpus，也不擅长输出可编辑、可验证、可被统计建模消费的 database。</p></div><div class="card s4"><h3>关键对象没有被定义</h3><p>同一批文档，不同研究问题会导致不同的行粒度。例如同样是法院判决，问题可以要求一行表示一个 judge，也可以要求一行表示一个 court ruling。</p></div><div class="card s12"><span class="tag">Query-driven</span><span class="tag green">Human-in-the-loop</span><span class="tag orange">Grounded outputs</span><p>这篇论文的 significance 在于把“结构化数据挖掘”的第一步前移：不是先假设表结构，再做 extraction；而是从研究问题和文档集合共同推断 <b>observation unit</b> 与 schema。对 Excel/Word/PDF 混合数据处理 agent 来说，这个思路很关键：agent 不应只回答问题，而应能构造一个被人类审计的数据资产。</p></div></div></section>
+<section><h2 class="title">论文 Figure 1：系统工作流</h2><div class="fig"><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-01.png" alt="Figure 1 ScheMatiQ workflow" /><p class="cap">Figure 1：ScheMatiQ workflow。给定自然语言问题和文档集合，系统依次发现 observation unit、发现 query-guided schema、抽取 structured values，并通过 feedback/refinement 回路让研究者修正 schema 与结果。</p></div></section>
+<section><h2 class="title">论文 Figure 6：同一语料，不同问题，不同行粒度</h2><div class="fig"><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-02.png" alt="Figure 6 different research questions imply different observation units" /><p class="cap">Figure 6：同一批法律文档，如果问题关注“不同总统任命的法官是否判决不同”，表格应一行一个 judge；如果问题关注“移民 injunction cases 在 court level 上 outcome 如何”，表格应一行一个 court ruling。这个图是 ScheMatiQ 最重要的概念锚点之一。</p></div></section>
+<section id="modeling"><h2 class="title">数学表示：把方法压缩成一个函数</h2><p class="lead">论文原文没有把方法写成完整数学模型。这里用一个简单形式化帮助理解：输入是问题 \(q\) 和文档集合 \(D\)，输出不是答案，而是一张带证据的数据表。</p><div class="grid"><div class="card s6"><h3>输入与输出</h3><p>给定自然语言研究问题 \(q\) 和文档集合 \(D=\{d_i\}_{i=1}^{N}\)，目标不是直接生成答案 \(a\)，而是生成一个 grounded database \(T\)。</p><div class="formula">\[\operatorname{ScheMatiQ}(q,D)\rightarrow\left(u,\;S,\;T,\;E\right)\]</div><p>其中 \(u\) 是 observation-unit type，\(S\) 是 schema，\(T\) 是结构化表，\(E\) 是每个 cell 的证据集合。</p></div><div class="card s6"><h3>行粒度：Observation Unit</h3><p>系统首先估计 \(u=f_{\theta}^{OU}(q,B)\)，其中 \(B\subset D\) 是一批文档。它输出 name、definition、example_names 和 reasoning。这个选择决定最终表格的行语义。</p><div class="formula">\[u=\{\text{name},\text{definition},\text{examples},\text{reasoning}\}\]</div><p>重要的是，文档和 observation unit 是多对多关系：一个 \(d_i\) 可包含多个 \(o_{ij}\)，同一个 \(o\) 也可出现在多个文档中。</p></div><div class="card s6"><h3>Schema 发现</h3><p>Schema 是一组列 \(S=\{c_1,\ldots,c_K\}\)。每个字段 \(c_k\) 不只是列名，还应包含 definition、rationale、allowed values/type。</p><div class="formula">\[c_k=\left(n_k,\;\delta_k,\;r_k,\;A_k\right)\]</div><p>Schema discovery 以 batch 为单位迭代：如果新文档包含对回答 \(q\) 有帮助但当前 \(S_t\) 缺失的信息，则产生 \(S_{t+1}=S_t\cup\Delta S_t\)。</p></div><div class="card s6"><h3>单元格抽取与证据约束</h3><p>对每个文档 \(d_i\)，先抽取 observation-unit instances \(O_i=\{o_{ij}\}\)。再对每个 \(o_{ij}\) 和字段 \(c_k\) 抽取值。</p><div class="formula">\[T[j,k]=\begin{cases}(v_{jk},e_{jk}),&e_{jk}\subset d_i\land e_{jk}\models v_{jk}\\\varnothing,&\text{no clear support}\end{cases}\]</div><p>论文明确要求 strict evidence rule：只有当文档文本清楚支持时才能填值；每个输出 cell 包含 extracted value 和 supporting evidence。</p></div></div></section>
+<section id="algorithm"><h2 class="title">算法流程：三步走，先设计表，再填表</h2><div class="grid"><div class="card s7"><div class="steps"><div class="step"><h3>Observation-unit discovery</h3><p>输入 \(q\) 和 sample documents，调用 backbone LLM 识别“每一行应该表示什么”。输出包含 type、definition、examples。专家可手动覆盖。</p></div><div class="step"><h3>Iterative schema discovery</h3><p>系统按 batch 处理文档，反复询问 LLM：这些文档是否建议添加或细化 schema？输出字段 definition、rationale、allowed values，直到没有新字段或 corpus 耗尽。</p></div><div class="step"><h3>Structured data extraction</h3><p>每篇文档先找所有 observation units，再一次性填充所有 schema 字段；若仍有空字段，则进行 targeted follow-up extraction。专家可修正 cell 并添加新文档。</p></div></div></div><div class="card s5"><h3>论文 Figure 2：三个组件</h3><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-03.png" alt="Figure 2 ScheMatiQ pipeline diagrams" /><p class="cap">Figure 2：三个系统组件。Schema discovery 是增量收敛过程；structured extraction 先找 observation units，再填字段，并对 missing fields 进行 fallback pass。</p></div></div></section>
+<section id="experiments"><h2 class="title">实验设计：两个真实领域，看它能不能帮专家建表</h2><p class="lead">这篇论文的实验不是刷榜，而是找两个已经有人类标注数据的真实研究场景，看系统生成的表结构和人工结果能不能对上。</p><div class="grid"><div class="card s6"><h3>模型与系统设置</h3><table><tr><th>组件</th><th>论文设置</th></tr><tr><td>Observation-unit discovery</td><td>Gemini-2.5-flash</td></tr><tr><td>Schema discovery</td><td>Gemini-2.5-flash</td></tr><tr><td>Structured data extraction</td><td>Gemini-2.5-flash-lite</td></tr><tr><td>成本</td><td>约 1 USD / 100 documents</td></tr><tr><td>可替换模型</td><td>Together AI 支持的模型；系统也支持 OpenAI GPT-4、Gemini、HuggingFace Transformers 本地开源模型</td></tr><tr><td>系统架构</td><td>React + TypeScript + Tailwind 前端；FastAPI 后端；WebSocket 实时进度；Python core library；Supabase；Railway + Docker</td></tr></table></div><div class="card s6"><h3>可复现实验对象</h3><p>论文不是用通用 benchmark 刷榜，而是选了两个已有人工标注基础的真实研究场景，用来比较 ScheMatiQ 生成的 schema 与人工 schema 是否对齐。</p><div class="case-grid"><div class="case-card"><h4>法律领域</h4><div class="case-meta"><div><strong>89</strong><span>court decisions</span></div><div><strong>Judge</strong><span>observation unit</span></div></div><p><span class="case-label">问题：</span>Trump 任命的法官是否更支持 Trump administration immigration policies？</p><p><span class="case-label">人工基准：</span>Klerman (2025) 标注 judge name、appointing president、decision outcome。</p><p><span class="case-label">难点：</span>长篇法律论证、多法官 panel、政策背景与判决倾向需要对齐到单个 judge。</p></div><div class="case-card"><h4>计算生物学</h4><div class="case-meta"><div><strong>96 / 110</strong><span>NESdb papers</span></div><div><strong>Protein</strong><span>observation unit</span></div></div><p><span class="case-label">问题：</span>给定 protein sequence，能否判断是否包含 NES、强度如何、置信度如何？</p><p><span class="case-label">人工基准：</span>NESdb curated protein annotations。</p><p><span class="case-label">难点：</span>蛋白、突变体、实验条件、定位信号和证据强度容易混在同一篇文献中。</p></div></div><div class="case-note">复现时最关键的是拿到原始文档、人工 schema、人工标注表，以及专家对齐规则。当前 GitHub 更适合复现系统流程；论文精确数字还依赖这些实验材料。</div></div><div class="card s12"><h3>论文 Figure 7：简化 prompt 截图</h3><div class="figure-grid"><div><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-04.png" alt="Figure 7a observation unit prompt" /><p class="mini-caption">Figure 7a：Observation unit discovery 的简化 prompt，强调 one row equals one answer。</p></div><div><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-05.png" alt="Figure 7b schema discovery prompt" /><p class="mini-caption">Figure 7b：Schema discovery 的简化 prompt，要求只添加 essential missing columns。</p></div></div></div><div class="card s12"><h3>Appendix A 给出的完整 Schema</h3><details open><summary>法律领域 26 个字段</summary><div class="schema-groups"><div class="schema-group"><h4>法官与法院信息</h4><div class="field-chips"><span class="field-chip">Judge Names</span><span class="field-chip">Judges On Panel</span><span class="field-chip">Appointing Presidents On Panel</span><span class="field-chip">Appointing Parties On Panel</span><span class="field-chip">Court Name</span><span class="field-chip">Court Level</span><span class="field-chip">Decision Date</span></div></div><div class="schema-group"><h4>政策与行政背景</h4><div class="field-chips"><span class="field-chip">Immigration Policy At Issue</span><span class="field-chip">Administration At Issue</span><span class="field-chip">Policy Instrument Type</span><span class="field-chip">Policy Instrument Purpose</span><span class="field-chip">Policy Instrument Date</span><span class="field-chip">Policy Instrument Issuing Authority</span><span class="field-chip">Policy Instrument Target Group</span></div></div><div class="schema-group"><h4>诉讼与主体类型</h4><div class="field-chips"><span class="field-chip">Case Subject Matter</span><span class="field-chip">Case Proceeding Type</span><span class="field-chip">Plaintiff Entity Types</span><span class="field-chip">Plaintiff Immigration Status Type</span><span class="field-chip">Defendant Entity Types</span><span class="field-chip">Legal Challenge Grounds</span></div></div><div class="schema-group"><h4>判决结果与命令</h4><div class="field-chips"><span class="field-chip">Judge Decision Outcome</span><span class="field-chip">Judge Decision Tendency</span><span class="field-chip">Court Decision Legal Basis</span><span class="field-chip">Injunction Scope</span><span class="field-chip">Executive Order Name</span><span class="field-chip">Executive Order Number</span></div></div></div></details><details><summary>计算生物学 26 个字段</summary><div class="schema-groups"><div class="schema-group"><h4>Protein / NES 基本识别</h4><div class="field-chips"><span class="field-chip">Protein Name</span><span class="field-chip">Source Organism</span><span class="field-chip">NES Identifier</span><span class="field-chip">Identified NES Sequence</span><span class="field-chip">NES Residue Coordinates</span><span class="field-chip">NES Motif Count</span></div></div><div class="schema-group"><h4>NES 状态、强度与证据</h4><div class="field-chips"><span class="field-chip">NES Presence Status</span><span class="field-chip">NES Strength Characterization</span><span class="field-chip">NES Determination Evidence</span><span class="field-chip">NES Binding Affinity</span><span class="field-chip">NES Functional Impact</span><span class="field-chip">Reclassification Status</span></div></div><div class="schema-group"><h4>结构与机制</h4><div class="field-chips"><span class="field-chip">Export Mechanism Type</span><span class="field-chip">Export Receptor</span><span class="field-chip">NES Regulation Mechanism</span><span class="field-chip">NES Structural Domain</span><span class="field-chip">NES Critical Residues</span><span class="field-chip">NES Consensus Conformity</span><span class="field-chip">NES Conservation Status</span></div></div><div class="schema-group"><h4>调控、定位与转移性</h4><div class="field-chips"><span class="field-chip">NES Activation Conditions</span><span class="field-chip">Regulatory Interacting Protein</span><span class="field-chip">NES Masking Agent</span><span class="field-chip">Competing Localization Signals</span><span class="field-chip">Observed Subcellular Localization</span><span class="field-chip">NES Origin</span><span class="field-chip">NES Transferability</span></div></div></div></details></div></div></section>
+
+<section id="prompts-deep"><h2 class="title">Prompt 设计：项目里到底有哪些 prompt</h2><p class="lead">论文正文只展示了简化 prompt，但 GitHub 里的实现更完整。可以把它们理解成两组：第一组负责“设计表”，第二组负责“按表填值”。</p><div class="grid"><div class="card s12"><h3>主链路</h3><div class="prompt-flow"><span>1. 发现一行是什么</span><span>2. 发现有哪些列</span><span>3. 找文档里的具体行</span><span>4. 给每一行填字段值</span></div><p>对应代码链路是 <span class="code-chip">SYSTEM_PROMPT_OBSERVATION_UNIT</span> → <span class="code-chip">SYSTEM_PROMPT_STANDARD</span> → <span class="code-chip">SYSTEM_PROMPT_UNIT_IDENTIFICATION</span> → <span class="code-chip">SYSTEM_PROMPT_VAL_WITH_UNIT</span> 或 <span class="code-chip">SYSTEM_PROMPT_VAL</span>。</p></div><div class="card s12"><h3>Schema discovery 相关 prompt</h3><table class="prompt-table"><tr><th>Prompt</th><th>位置</th><th>作用</th><th>关键约束</th></tr><tr><td>SYSTEM_PROMPT_OBSERVATION_UNIT</td><td>core/prompts.py</td><td>根据 query + sample passages 判断表格每一行代表什么。</td><td>One Row = One Answer to the Query；name 必须 1-3 个词；experiments、variants、measurements 通常不是行。</td></tr><tr><td>USER_PROMPT_TMPL_OBSERVATION_UNIT</td><td>core/prompts.py</td><td>把 <span class="code-chip">query</span> 和 <span class="code-chip">joined_passages</span> 填进 observation unit prompt。</td><td>提醒模型同一实体的实验和变体不要拆成多行。</td></tr><tr><td>SYSTEM_PROMPT_STANDARD</td><td>core/prompts.py</td><td>标准 schema discovery：同时使用 query 和 documents 发现字段。</td><td>只添加真正缺失、有价值、可抽取、对多数文档有用、且属于 observation unit 属性的字段。</td></tr><tr><td>USER_PROMPT_TMPL_STANDARD</td><td>core/prompts.py</td><td>把研究问题和当前 passages 批次交给 schema prompt。</td><td>后续会追加 draft schema 和 observation unit context。</td></tr><tr><td>SYSTEM_PROMPT_DOCUMENT_ONLY</td><td>core/prompts.py</td><td>只看文档、不看 query 的消融模式。</td><td>默认不加列；只保留通用、跨文档适用的字段。</td></tr><tr><td>SYSTEM_PROMPT_QUERY_ONLY</td><td>core/prompts.py</td><td>只看 query、不看 documents 的规划模式。</td><td>生成回答问题所需的 3-10 个计划字段，之后由文档再细化。</td></tr><tr><td>DRAFT_SCHEMA_TMPL</td><td>core/prompts.py</td><td>把已有 schema 放回 prompt，支持迭代补列。</td><td>先 review 已有字段，只 append 真正缺失的信息。</td></tr><tr><td>OBSERVATION_UNIT_CONTEXT_TMPL</td><td>core/prompts.py</td><td>在 schema discovery 时告诉模型“一行是什么”。</td><td>每个字段都应该是该 observation unit 的属性，避免 document-level 字段混入。</td></tr></table></div><div class="card s12"><h3>Value extraction 相关 prompt</h3><table class="prompt-table"><tr><th>Prompt</th><th>位置</th><th>作用</th><th>关键约束</th></tr><tr><td>SYSTEM_PROMPT_VAL</td><td>value_extraction/config/prompts.py</td><td>根据 requested columns 从文档中抽取具体字段值。</td><td>只输出 JSON；找不到就省略字段；必须带 supporting excerpts；禁止 unknown/N/A。</td></tr><tr><td>SYSTEM_PROMPT_VAL_STRICT</td><td>value_extraction/config/prompts.py</td><td>更严格的字段抽取模式。</td><td>只有直接被文本支持且能给 excerpt 的值才输出。</td></tr><tr><td>SYSTEM_PROMPT_VAL_REEXTRACT</td><td>value_extraction/config/prompts.py</td><td>第一次没抽到某些字段时二次查找。</td><td>重点检查 tables、figures、captions、footnotes、appendices、synonyms 和 implicit expressions。</td></tr><tr><td>SYSTEM_PROMPT_UNIT_IDENTIFICATION</td><td>value_extraction/config/prompts.py</td><td>在单篇文档中列出具体 observation unit instances。</td><td>这不是值抽取；用 Subject Test 排除工具、方法、control、baseline；倾向 consolidate variants。</td></tr><tr><td>USER_PROMPT_TMPL_UNIT_IDENTIFICATION</td><td>value_extraction/config/prompts.py</td><td>把 query、unit definition 和 document text 交给 unit identification prompt。</td><td>输出具体 unit_name、confidence，可选 relevant_passages。</td></tr><tr><td>SYSTEM_PROMPT_VAL_WITH_UNIT</td><td>value_extraction/config/prompts.py</td><td>针对某一个具体 unit 抽字段值。</td><td>只抽当前 unit 的值，不能把其他 entities 的数据串进来。</td></tr><tr><td>PromptBuilder</td><td>value_extraction/utils/prompt_builder.py</td><td>不是 prompt 原文，而是组装 value extraction messages。</td><td>把 query、paper title、paper text、columns 组织进 XML-like 标签；遇到 Markdown table 会提醒模型看表头和单元格。</td></tr></table></div><div class="card s6"><h3>最值得注意的设计</h3><p><b>Schema prompt 不是简单“从文档找字段”。</b>它先做 research question decomposition：比较轴、outcome、independent variables、confounders、领域专家会关心的概念，都应该优先成为字段候选。</p></div><div class="card s6"><h3>最强的防幻觉约束</h3><p>Value extraction prompt 明确要求：没有证据就省略字段，不允许输出 unknown、N/A 或 not provided；每个值都要有 supporting excerpt。这是它把自然语言文档转成可信表格的关键。</p></div></div></section>
+
+<section id="results"><h2 class="title">实验结果与核心结论</h2><div class="grid"><div class="card s6"><h3>Schema 覆盖：Figure 4</h3><p>专家先把人工 schema 和 ScheMatiQ schema 对齐，再评估各自独有字段。论文结论：两域中 ScheMatiQ 都只漏掉两个宽泛 miscellaneous 字段，同时提出大量专家认为有用的新字段。</p><div class="formula">\[\begin{array}{lccc}\text{Domain}&\text{ScheMatiQ-only}&\text{Mutual}&\text{Manual-only}\\\hline\text{Legal}&61\%&31\%&8\%\\\text{Computational Biology}&59\%&32\%&9\%\end{array}\]</div><p>新增字段 relevance rating：计算生物学平均 \(4.2/5\)，法律领域平均 \(3.6/5\)。法律领域有用新增字段包括 court decision legal basis、injunction scope、administration at issue。</p></div><div class="card s6"><h3>输入消融：Figure 5</h3><p>作者比较三种输入条件：只给 research question、只给 documents、同时给两者。结论是 question-only 产生高层通用字段，document-only 产生不一定对齐研究目标的宽泛字段，而 \(q+D\) 才产生 context-specific 字段。</p><div class="formula">\[S(q,D)\neq S(q,\varnothing)\cup S(\varnothing,D)\]</div><p>Figure 5 中没有 three-way overlap，这被作者解释为：有意义的 schema 不是由问题或文档单独决定，而是由二者交互决定。</p></div><div class="card s6"><h3>Observation unit recall</h3><p>这里评估的是系统能不能把“每一行应该出现的对象”找全。论文报告：计算生物学中识别出 \(87\%\) proteins；法律领域识别出 \(74\%\) judges；测试样例上 precision 为 \(100\%\)。</p><table><tr><th>领域</th><th>Observation unit</th><th>Recall</th><th>Precision</th></tr><tr><td>计算生物学</td><td>Protein</td><td>87%</td><td>100%</td></tr><tr><td>法律</td><td>Judge</td><td>74%</td><td>100%</td></tr></table><p>错误主要来自高密度文档：一篇文档里包含很多 proteins 或 judges 时，系统更容易漏掉对象；如果文档只包含单个核心对象，recall 接近完美。</p><table><tr><th>现象</th><th>含义</th></tr><tr><td>Precision 高</td><td>模型很少凭空造不存在的 observation unit。</td></tr><tr><td>Recall 仍有缺口</td><td>真正风险是漏抽，而不是乱抽。</td></tr><tr><td>高密度文档更难</td><td>需要 entity enumeration、分块抽取、去重和二次校验。</td></tr></table><p>对 Excel/Word/PDF agent 的启发是：如果一个文件里有很多项目、负责人、截止日期或合同条款，不能只做一次整体抽取，应该先枚举对象，再逐对象填字段。</p></div><div class="card s6"><h3>论文 Figure 3/4/5</h3><div class="figure-grid"><div class="wide"><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-06.png" alt="Figure 3 ScheMatiQ web interface" /><p class="mini-caption">Figure 3：Web interface。用户输入问题与文档，检查并修正 observation unit 与 schema，再查看带证据的 extracted table。</p></div><div><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-07.png" alt="Figure 4 schema field coverage" /><p class="mini-caption">Figure 4：Schema-field coverage。法律领域 61/31/8，计算生物学 59/32/9。</p></div><div><img class="paper-img" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schematiq/inline/figure-08.png" alt="Figure 5 schema field overlap ablation" /><p class="mini-caption">Figure 5：Query-only、documents-only、combined 的 schema-field overlap。</p></div></div></div><div class="card s12"><h3>四个核心 insight</h3><table><tr><th>Insight</th><th>解释</th><th>对数据处理 agent 的含义</th></tr><tr><td>行粒度比字段更先验</td><td>先决定 row 是 judge、case、protein，后面的 schema 才有意义。</td><td>Excel agent 应先识别“每行代表什么”，再做字段抽取或透视。</td></tr><tr><td>Schema 是研究问题驱动的</td><td>同一语料可导出不同数据库。</td><td>不要把“自动 schema discovery”做成纯文档摘要；必须显式输入任务目标。</td></tr><tr><td>证据 grounding 是可信度基础</td><td>每个 cell 都要有 supporting evidence。</td><td>输出表格应带 cell-level provenance，而不是只有最终值。</td></tr><tr><td>人机协同不是 UI 装饰</td><td>专家能改 observation unit、schema、cell，是系统可靠性的组成部分。</td><td>复杂领域数据挖掘中，human approval 应是 pipeline 状态，而不是事后评论。</td></tr></table></div></div></section>
+<section id="reproduce"><h2 class="title">复现清单：重做这篇工作需要什么</h2><p class="lead">论文给的信息足以复现系统思想，但不足以完全复现实验数字，因为完整 prompt、代码版本、Gemini API 行为、抽样测试集和专家对齐细节需要从 GitHub 或作者资源补齐。</p><div class="grid"><div class="card s4"><h3>数据准备</h3><ul><li>法律：收集 89 个 immigration injunction court decisions。</li><li>计算生物学：收集 NESdb references；确认使用 96 还是 110 篇。</li><li>每篇文档保留原文、段落 ID、页码或 passage span。</li></ul></div><div class="card s4"><h3>Pipeline 参数</h3><ul><li>选择 batch size \(m\)，构造 \(B_t=\{d_{tm},\ldots,d_{tm+m-1}\}\)。</li><li>记录 temperature、top-p、max tokens、model snapshot。</li><li>缓存每次 LLM call 的输入、输出和版本。</li></ul></div><div class="card s4"><h3>评测协议</h3><ul><li>专家对齐 manual schema 与 ScheMatiQ schema。</li><li>统计 manual-only、mutual、ScheMatiQ-only 字段比例。</li><li>对新增字段打 relevance score。</li><li>抽样计算 observation unit precision/recall。</li></ul></div><div class="card s12"><h3>我会额外补的指标</h3><div class="formula">\[\text{CellAccuracy}=\frac{1}{|\Omega|}\sum_{(j,k)\in\Omega}\mathbf{1}\left[\hat v_{jk}=v_{jk}^{gold}\land \hat e_{jk}\text{ supports }\hat v_{jk}\right]\]</div><p>论文更强调 schema 层评估，但如果目标是做可靠的数据挖掘 agent，必须进一步报告 cell-level value accuracy、evidence precision、missing-value calibration、跨运行稳定性、专家修正成本，以及高密度文档下的 recall 曲线。</p></div></div></section>
+<section id="review"><div class="review"><h2 class="title">评论</h2><p class="lead" style="color:rgba(255,255,255,.78)">这篇工作很聪明，问题意识也非常对。但它更像一个强系统 paper / vision paper，而不是一个评测闭环非常硬的 benchmark paper。</p><div class="score"><span>问题定义：9/10</span><span>系统设计：8/10</span><span>实验严谨性：6/10</span><span>可复现性：6/10</span><span>研究启发：9/10</span></div><div class="grid"><div class="card s6" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)"><h3>优势</h3><ul><li>抓住了“从问题到数据结构”的核心痛点，比单纯 information extraction 更上游。</li><li>Observation unit 的显式建模非常关键，这是很多 document-to-table 系统忽略的。</li><li>Schema discovery 同时条件化于 query 与 documents，避免了通用 schema 和纯语料 schema 的错位。</li><li>UI、人机协同和 evidence grounding 是系统级可靠性的真实组成部分，不是 demo 外壳。</li></ul></div><div class="card s6" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.16)"><h3>不足</h3><ul><li>实验规模偏小，两个领域很好但还不足以证明“跨学科泛化”。</li><li>主要结果是 schema coverage 与专家 relevance，缺少系统性的 cell-level accuracy。</li><li>闭源 Gemini API 带来复现不稳定，论文也承认固定参数仍可能有小变化。</li><li>Appendix 中计算生物学文档数与正文存在 96/110 的口径不一致，需要澄清。</li><li>没有和 DocETL、SciDaSynth、LLMs4SchemaDiscovery、Text-to-table 等系统做强 end-to-end baseline 对比。</li></ul></div></div><p>如果我是 reviewer，我会要求作者补三个东西：第一，给出字段级和单元格级的 error taxonomy；第二，在至少 5 个领域做 leave-domain-out 测试；第三，把 human-in-the-loop 的收益量化成“专家时间节省”和“修正前后准确率提升”。这样这篇工作会从很好的系统 demo，变成真正坚实的数据挖掘方法论文。</p></div></section>
+<section id="one-more"><h2 class="title">One More Thing：这篇论文对 Excel/Word Agent 的启发</h2><div class="grid"><div class="card s5"><h3>不要直接问文件答案，先问数据结构</h3><p>如果要做泛化数据处理 agent，我会把 ScheMatiQ 的第一步扩展成 <b>file-to-research-table planning</b>：先确定 row unit，再确定列，再确定每列的证据来源、类型、单位和校验规则。</p></div><div class="card s7"><h3>面向 Excel/Word/PDF 的统一 IR</h3><div class="formula">\[\mathcal{I}(x)=\left(\text{blocks},\text{tables},\text{entities},\text{relations},\text{provenance}\right)\]</div><p>Excel 的 sheet/range/formula，Word 的 heading/table/comment，PDF 的 page/layout/span，都应进入统一中间表示 \(\mathcal{I}(x)\)。LLM 在 \(\mathcal{I}\) 上做 schema planning，确定性工具负责计算、抽取、校验和写回。</p></div><div class="card s12"><h3>一个更强版本的 ScheMatiQ 应该长这样</h3><table><tr><th>模块</th><th>增强方向</th></tr><tr><td>Schema discovery</td><td>加入字段去重、层级 schema、单位标准化、field dependency graph。</td></tr><tr><td>Extraction</td><td>对每个 cell 输出 value、evidence、confidence、validator result、human edit history。</td></tr><tr><td>Reliability</td><td>用 self-consistency、retrieval verification、typed constraints 和 deterministic recalculation 共同校验。</td></tr><tr><td>Privacy</td><td>在 LLM 前做本地 PII 检测与 reversible masking，输出日志也必须脱敏。</td></tr><tr><td>Evaluation</td><td>构造跨文件类型 benchmark：Excel financial models、Word contracts、PDF papers、CSV operational logs。</td></tr></table></div></div></section>
+
+</main>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/02/PaperReadings/schematiq/">http://nanamiakari.github.io/2026/05/02/PaperReadings/schematiq/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/">结构化数据</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div><div class="next-post pull-right"><a href="/2025/08/15/DocumentConvert/DocumentConvert/" title="DocumentConvert"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">DocumentConvert</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">LLMStructBench: 结构化数据抽取基准</div></div></a></div><div><a href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">SCHEMA-MINERpro: 让机器读懂科学实验流程</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程">SCHEMA-MINERpro: 让机器读懂科学实验流程</a><time datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格">Docs2Table: 从多文档到结构化表格</a><time datetime="2026-05-13T07:48:15.000Z" title="发表于 2026-05-13 15:48:15">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分">CONSTRUCT: 结构化输出的实时可信度评分</a><time datetime="2026-05-07T02:37:02.000Z" title="发表于 2026-05-07 10:37:02">2026-05-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准">LLMStructBench: 结构化数据抽取基准</a><time datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

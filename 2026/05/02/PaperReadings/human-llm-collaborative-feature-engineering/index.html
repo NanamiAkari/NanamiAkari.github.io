@@ -1,0 +1,1021 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Human-LLM Collaborative Feature Engineering for Tabular Learning | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ICLR 2026 Conference Paper · Tabular Learning · Feature Engineering         让 LLM 生成，让不确定性选择。                    论文《Human-LLM Collaborative Feature Engineering for Tabular">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Human-LLM Collaborative Feature Engineering for Tabular Learning">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="ICLR 2026 Conference Paper · Tabular Learning · Feature Engineering         让 LLM 生成，让不确定性选择。                    论文《Human-LLM Collaborative Feature Engineering for Tabular">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-02T09:49:28.000Z">
+<meta property="article:modified_time" content="2026-05-20T12:42:58.780Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="结构化数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Human-LLM Collaborative Feature Engineering for Tabular Learning',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-20 20:42:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Human-LLM Collaborative Feature Engineering for Tabular Learning</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-02T09:49:28.000Z" title="发表于 2026-05-02 17:49:28">2026-05-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-20T12:42:58.780Z" title="更新于 2026-05-20 20:42:58">2026-05-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>22分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-human-llm-collaborative-feature-engineering">
+<header class="hero">
+    <div class="hero-grid">
+      <div>
+        <p class="eyebrow">ICLR 2026 Conference Paper · Tabular Learning · Feature Engineering</p>
+        <h2 class="paper-main-title">让 LLM 生成，让不确定性选择。</h2>
+        <p class="subtitle">
+          论文《Human-LLM Collaborative Feature Engineering for Tabular Learning》的核心思想很干脆：
+          LLM 不再扮演黑箱优化器，而只负责提出候选特征；真正的选择由显式效用模型、UCB 探索和选择性人类偏好反馈来完成。
+        </p>
+      </div>
+      <aside class="hero-card">
+        <div class="metric-stack">
+          <div class="metric"><b>18</b><span>个 Kaggle/UCI/公司数据集，含 13 个分类、5 个回归任务。</span></div>
+          <div class="metric"><b>50</b><span>主实验中 LLM 特征工程最大迭代预算。</span></div>
+          <div class="metric"><b>15</b><span>每轮由 LLM 生成的候选 feature transformation operations。</span></div>
+          <div class="metric"><b>31</b><span>真实用户研究中的 ML 工程师、研究者或 AI/ML 背景研究生。</span></div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main>
+    <section id="quick-read">
+      <div class="section-head">
+        <span class="kicker">Quick Read</span>
+        <h2>先用一分钟看懂：这篇论文到底在干嘛？</h2>
+        <p class="lead">
+          它研究的是：表格任务里，怎样让 LLM 更靠谱地帮我们做特征工程。核心不是让 LLM 自己全权决定，而是把工作拆开。
+        </p>
+      </div>
+      <div class="plain">
+        <p>LLM 很会“想特征”，但不一定会“判断哪个特征真有用”。所以本文让 LLM 负责生成候选特征，再用一个会估计收益和不确定性的模型来挑选，必要时才问人类专家二选一。</p>
+      </div>
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>原来的做法</h3>
+          <p>LLM 既生成特征，也自己决定用哪个。问题是它的判断可能只是“听起来合理”，不一定真的能提高模型效果。</p>
+        </div>
+        <div class="card">
+          <h3>本文的做法</h3>
+          <p>LLM 只负责提出一批候选。系统用 BNN 预测每个候选可能带来的收益，再用 UCB 选择最值得试的那个。</p>
+        </div>
+        <div class="card">
+          <h3>人类怎么参与</h3>
+          <p>人类不用写特征，也不用每轮审核。只有当系统拿不准两个候选哪个更好时，才让人类做一次简单的二选一。</p>
+        </div>
+      </div>
+      <div class="term-grid">
+        <div class="term"><b>特征工程</b><span>把原始列变成更有用的新列，例如贷款金额除以收入。</span></div>
+        <div class="term"><b>BNN</b><span>会表达“不确定”的神经网络。它不仅预测收益，也说自己有多没把握。</span></div>
+        <div class="term"><b>UCB</b><span>一种选择策略：优先试“看起来好”或“虽然不确定但有潜力”的候选。</span></div>
+        <div class="term"><b>Pairwise preference</b><span>成对偏好比较。给 A/B 两个候选，让人判断哪个更值得试。</span></div>
+      </div>
+    </section>
+
+    <section id="background">
+      <div class="section-head">
+        <span class="kicker">Background</span>
+        <h2>背景：表格学习里的老问题，被 LLM 重新点燃。</h2>
+        <p class="lead">
+          表格数据仍然是风控、推荐、医疗、用户转化等场景的主力数据形态。模型性能很大程度上取决于特征工程：
+          原始列 \(x_i \in \mathbb{R}^d\) 是否能被转换为更贴近任务机制的新表示。
+        </p>
+      </div>
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>传统 AutoML</h3>
+          <p>OpenFE、AutoGluon 等方法通常在预定义算子空间里搜索组合。优点是工程稳定，缺点是缺乏任务语义，容易制造重复或低价值特征。</p>
+          <p class="note">它像一个勤快的“公式试验机”，会机械地试加减乘除、分箱、交叉等组合，但不太懂列名背后的业务含义。</p>
+        </div>
+        <div class="card">
+          <h3>LLM 特征工程</h3>
+          <p>CAAFE、OCTree 等工作利用任务描述、列名和历史反馈，让 LLM 生成新特征。它们能利用语义知识，但经常让 LLM 同时负责“提出”和“选择”。</p>
+          <p class="note">LLM 更像有业务常识的助手，能想到“数字体验”“健康风险组合”这类有意义的特征，但它不一定知道这些特征是否真能涨分。</p>
+        </div>
+        <div class="card">
+          <h3>本文切入点</h3>
+          <p>作者质疑：LLM 的内部启发式并没有校准的效用和不确定性估计。有限迭代预算下，黑箱选择会浪费评估机会。</p>
+          <p class="note">所以本文关注的不是“怎么让 LLM 多生成”，而是“生成之后怎么更聪明地选”。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <div class="section-head">
+        <span class="kicker">Problem</span>
+        <h2>解决什么问题：不是缺少候选，而是缺少可信的选择机制。</h2>
+        <p class="lead">
+          当前 LLM-powered feature engineering 的隐含假设是：LLM 既会想特征，也会知道哪些特征值得评估。本文认为这个假设太强。
+        </p>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>黑箱优化的三个症状</h3>
+          <p><span class="tag">无校准效用</span><span class="tag">无不确定性</span><span class="tag">重复低收益探索</span></p>
+          <p>LLM 可能反复提出看起来合理但边际收益很低的 transformation；当迭代预算 \(T\) 很小，错误选择的代价很高。</p>
+        </div>
+        <div class="card">
+          <h3>人类专家的价值</h3>
+          <p>人类未必能直接给每个特征打分，但擅长 pairwise preference：在两个候选操作 \(e_a,e_b\) 之间判断哪个更有希望。</p>
+          <p>关键是不能每轮都问人，否则认知成本爆炸；必须“值得问时才问”。</p>
+          <p class="note">例如：预测贷款批准时，让专家在“贷款额/收入”和“年龄平方”之间选一个，通常比让专家估计“能提升多少 AUROC”容易得多。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="current-methods">
+      <div class="section-head">
+        <span class="kicker">Existing Methods</span>
+        <h2>目前的方法：AutoML 靠算子搜索，LLM 方法靠语义启发式。</h2>
+        <p class="lead">本文的位置很清晰：它不是替换 LLM，也不是替换 AutoML，而是把 LLM 生成能力接到一个更有原则的选择层上。</p>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>非 LLM baseline</h3>
+          <p><b>OpenFE</b>：自动构造并筛选特征，依赖预定义 transformation operators。</p>
+          <p><b>AutoGluon</b>：端到端 AutoML 系统，包含自动预处理、模型选择与集成能力，但不是专门利用任务语义生成新特征。</p>
+        </div>
+        <div class="card">
+          <h3>LLM baseline</h3>
+          <p><b>CAAFE</b>：用任务描述和列语义 prompt LLM，迭代生成 semantically meaningful features。</p>
+          <p><b>OCTree</b>：把 LLM 作为黑箱优化器，结合验证分数和决策树蒸馏出的 verbalized reasoning 来提出与改进 feature generation rules。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="method">
+      <div class="section-head">
+        <span class="kicker">Method</span>
+        <h2>本文方法：LLM 只提案，BNN+UCB 做选择，人类只在高价值不确定时介入。</h2>
+        <p class="lead">整体流程可以顺着“候选生成 → 表示编码 → 代理建模 → UCB 选择 → 选择性偏好反馈 → 评估并更新数据集”理解。</p>
+      </div>
+      <div class="analogy">
+        <p><strong>可以把系统想成一个招聘流程：</strong>LLM 像猎头，负责推荐很多候选人；BNN 像评估官，预测每个人可能表现如何以及评估有多不确定；UCB 像面试策略，既看当前评分，也给潜力股机会；人类专家只在两个候选很难分出高下时参与面试。</p>
+      </div>
+      <div class="flow">
+        <div class="step"><strong>1. LLM 生成</strong><small>给定列描述、任务信息和历史反馈，LLM 采样候选集合 \(S_t\)。</small></div>
+        <div class="step"><strong>2. 操作编码</strong><small>拼接语义 embedding 与列使用二进制向量 \(\phi(e)\)。</small></div>
+        <div class="step"><strong>3. BNN 代理</strong><small>拟合 \(\tilde g(\phi(e);\theta)\)，输出 \(\mu_t(e)\) 与 \(\sigma_t(e)\)。</small></div>
+        <div class="step"><strong>4. UCB 选择</strong><small>最大化 \(\mu_t(e)+\sqrt{\beta_t}\sigma_t(e)\)，兼顾利用与探索。</small></div>
+        <div class="step"><strong>5. 人类偏好</strong><small>当 overlap 与 uncertainty 条件同时满足时，查询偏好并更新 posterior。</small></div>
+      </div>
+      <div class="grid cols-2" style="margin-top:18px;">
+        <div class="card good">
+          <h3>创新点 1：解耦 proposal 与 selection</h3>
+          <p>LLM 的强项是语义联想和候选生成；选择则交给显式的 utility/uncertainty model。这是本文最重要的工程和建模判断。</p>
+        </div>
+        <div class="card good">
+          <h3>创新点 2：把人类反馈变成“预算化观测”</h3>
+          <p>人类反馈不是无条件加入，而是有两个触发条件：候选置信区间必须重叠，且潜在收益上界必须超过反馈成本 \(\gamma_\kappa\)。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="math">
+      <div class="section-head">
+        <span class="kicker">Mathematical Modeling</span>
+        <h2>数学表示与建模：从 feature operation 到带偏好反馈的 Bayesian selection。</h2>
+      </div>
+
+      <h3>1. 任务与效用函数</h3>
+      <p>数据集 \(D=\{(x_i,y_i)\}_{i=1}^{n}\)，其中 \(x_i \in \mathbb{R}^d\)，列集合 \(C=\{c_1,\ldots,c_d\}\)。每个 feature transformation operation \(e \in \mathcal{E}\) 将原数据矩阵 \(X\in\mathbb{R}^{n\times d}\) 映射为新列 \(z_e\in\mathbb{R}^n\)。</p>
+      <div class="formula">\[
+        g(e)=J(f_{\mathrm{tabular}};D_{\mathrm{val}}\oplus e),
+        \quad
+        f_{\mathrm{tabular}}=\arg\min_f L(f;D_{\mathrm{train}}\oplus e)
+      \]</div>
+      <div class="plain">
+        <p>把候选特征 \(e\) 加进数据表，重新训练一次模型，再看验证集分数。这个分数就是该特征的真实价值 \(g(e)\)。问题是，每测一次都要训练模型，所以很贵。</p>
+      </div>
+      <p>每轮目标是 \(e_t^\star=\arg\max_{e\in\mathcal{E}}g(e)\)。但 \(g(e)\) 只有在训练下游模型并验证后才能观测，因此是昂贵黑箱。</p>
+
+      <h3>2. LLM 候选生成</h3>
+      <div class="formula">\[
+        S_t \sim P_M(\cdot \mid H_t,C,\mathrm{Meta}),
+        \quad
+        H_t=\{(e_i,g(e_i))\}_{i=1}^{t-1}
+      \]</div>
+      <div class="plain">
+        <p>第 \(t\) 轮时，LLM 会根据历史上试过哪些特征、效果如何、当前数据列是什么、任务目标是什么，生成一批候选特征 \(S_t\)。</p>
+      </div>
+      <p>区别于 CAAFE/OCTree，本文不让 \(M\) 直接选择最终 \(e_t\)，而是只把 \(M\) 当作 proposal distribution。</p>
+
+      <h3>3. 操作表示 \(\phi(e)\)</h3>
+      <div class="formula">\[
+        \phi(e)=\left[\phi_{\mathrm{embedding}}(e),\phi_{\mathrm{column}}(e)\right],
+        \quad
+        \phi_{\mathrm{column}}(e)=\big[\mathbb{I}[c_i\text{ is used in }e]\big]_{i=1}^{d}
+      \]</div>
+      <div class="plain">
+        <p>系统要先把“一个特征操作”变成模型能读的向量。这个向量由两部分组成：一部分表示这段操作的语义，另一部分明确标记它用了哪些原始列。</p>
+      </div>
+      <p>\(\phi_{\mathrm{embedding}}\) 使用 OpenAI <code>text-embedding-3-small</code>；\(\phi_{\mathrm{column}}\) 显式告诉代理模型这个候选特征用到了哪些原始列，弥补自然语言 embedding 对相似列名的混淆。</p>
+
+      <h3>4. BNN surrogate 与变分后验</h3>
+      <p>作者选择 Bayesian Neural Network 而非 Gaussian Process，因为候选操作是高维语言派生表示，且非平稳性强。后验 \(P(\theta\mid H_t)\) 不可直接求，使用 \(q_t(\theta)=\mathcal{N}(\theta;M_t,\Sigma_t)\) 做变分近似：</p>
+      <div class="formula">\[
+        \mathrm{KL}\big(q_t(\theta)\|P(\theta\mid H_t)\big)
+        =\mathrm{KL}\big(q_t(\theta)\|P(\theta)\big)
+        -\mathbb{E}_{q_t(\theta)}[\log P(H_t\mid\theta)]
+        +\mathrm{const}
+      \]</div>
+      <p>实验中先验设为 \(P(\theta)=\mathcal{N}(0,I)\)。预测均值与不确定性为：</p>
+      <div class="formula">\[
+        \mu_t(e)=\mathbb{E}_{q_t(\theta)}[\tilde g(\phi(e);\theta)],
+        \quad
+        \sigma_t^2(e)=\mathbb{E}_{q_t(\theta)}[\tilde g(\phi(e);\theta)^2]-\mu_t(e)^2
+      \]</div>
+      <div class="plain">
+        <p>BNN 对每个候选特征输出两个数：\(\mu_t(e)\) 是“我预测它有多好”，\(\sigma_t(e)\) 是“我对这个预测有多没把握”。本文后面的选择策略就靠这两个数。</p>
+      </div>
+
+      <h3>5. UCB 选择</h3>
+      <p>在置信事件下，\(|g(e)-\mu_t(e)|\le \sqrt{\beta_t}\sigma_t(e)\)。其中 \(\delta=0.1\)，\(\beta_t=2\log\left(\frac{|S_t|\pi^2t^2}{3\delta}\right)\)。</p>
+      <div class="formula">\[
+        \mathrm{UCB}_t(e)=\mu_t(e)+\sqrt{\beta_t}\sigma_t(e),
+        \quad
+        \mathrm{LCB}_t(e)=\mu_t(e)-\sqrt{\beta_t}\sigma_t(e)
+      \]</div>
+      <div class="plain">
+        <p>UCB 分数 = 预测收益 + 不确定性奖励。一个特征如果预测收益高，会被选；如果预测收益一般但模型很不确定，也可能因为“潜在惊喜”被选。LCB 则是比较保守的下界估计。</p>
+      </div>
+      <p>无人在环时，直接选择 \(e_t^a=\arg\max_{e\in S_t}\mathrm{UCB}_t(e)\)。</p>
+
+      <h3>6. 选择性人类偏好反馈</h3>
+      <p>人类专家是随机 oracle \(\kappa\)，对候选对 \((e_t^a,e_t^b)\) 给出 \(Z_t\in\{+1,-1\}\)。论文先选 \(e_t^a\) 为 UCB 最优，再选 \(e_t^b=\arg\max_{e\in S_t\setminus\{e_t^a\}}\mathrm{UCB}_t(e)\)。</p>
+      <div class="formula">\[
+        U(e_t^a,e_t^b;\kappa)
+        =\mathbb{E}_{Z_t}\left[g(e'_t)-g(e_t^a)\right]
+        \le \max\{\mathrm{UCB}_t(e_t^b)-\mathrm{LCB}_t(e_t^a),0\}
+      \]</div>
+      <div class="plain">
+        <p>问人类有没有价值，取决于人类反馈是否可能让系统从当前选择 \(e_t^a\) 切换到更好的 \(e_t^b\)。如果 \(e_t^b\) 的最好情况都比不过 \(e_t^a\) 的保守情况，那就没必要问人。</p>
+      </div>
+      <p>触发人类查询必须同时满足：</p>
+      <div class="formula">\[
+        \mathrm{UCB}_t(e_t^b)>\mathrm{LCB}_t(e_t^a)
+        \quad\text{and}\quad
+        \sqrt{\beta_t}\big(\sigma_t(e_t^a)+\sigma_t(e_t^b)\big)\ge \gamma_\kappa
+      \]</div>
+      <div class="plain">
+        <p>第一，两个候选的可能表现范围要有重叠，说明确实难分胜负；第二，不确定性要足够大，说明问人类可能带来足够收益，值得付出认知成本。</p>
+      </div>
+      <p>实验中 \(\gamma_\kappa=4\)，偏好置信度超参数 \(\eta=1\)。偏好似然采用 probit：</p>
+      <div class="formula">\[
+        P(Z_t\mid\theta,e_t^a,e_t^b)=
+        \Phi\left(\eta Z_t\left[\tilde g(\phi(e_t^a);\theta)-\tilde g(\phi(e_t^b);\theta)\right]\right)
+      \]</div>
+      <p>偏好反馈被视为关于两个候选相对效用的概率观测，而不是硬规则。这一点很关键：人类可能错，模型也可能错，posterior fusion 才是协作。</p>
+    </section>
+
+    <section id="experiments">
+      <div class="section-head">
+        <span class="kicker">Experiments</span>
+        <h2>实验方法与设计：主实验、可扩展性、真实用户研究三条线。</h2>
+      </div>
+
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>主实验设置</h3>
+          <p>数据：18 个表格数据集，其中 13 个分类、5 个回归；每个数据集随机 80%/20% 划分 train/validation，结果平均 5 次运行。</p>
+          <p>LLM：GPT-4o 主实验，temperature \(=1\)，每轮生成 15 个候选，最大迭代 \(T=50\)。额外比较 DeepSeek-V3、GPT-3.5-Turbo、GPT-4o、GPT-5。</p>
+          <p>下游模型：MLP 与 XGBoost。分类指标为 AUROC，回归指标为 normalized RMSE。</p>
+          <p class="note">怎么看：作者不是只在一个模型上试，而是用 MLP 和 XGBoost 两种不同下游模型，检查生成的特征是否普遍有帮助。</p>
+        </div>
+        <div class="card">
+          <h3>Baseline</h3>
+          <p><span class="tag">OpenFE</span><span class="tag">AutoGluon</span><span class="tag">CAAFE</span><span class="tag">OCTree</span></p>
+          <p>OpenFE/AutoGluon 代表非 LLM AutoML 特征工程；CAAFE/OCTree 代表 LLM-based feature engineering。非 LLM 方法跑到收敛，LLM 方法统一迭代预算。</p>
+          <p class="note">怎么看：如果本文方法超过 CAAFE/OCTree，说明收益不只是来自“用了 LLM”，而是来自“更会选择 LLM 候选”。</p>
+        </div>
+      </div>
+
+      <details open>
+        <summary>算法 1：Iterative Selection of LLM-Proposed Feature Transformation Operations</summary>
+        <pre><code>Input: D_train, D_eval, LLM M, tabular learner f, budget T
+Initialize H_1 = empty, feature operation pool S_0 = empty
+for t = 1 ... T:
+  S_t = {operations proposed by M in round t} union S_{t-1} minus {previously selected}
+  Fit surrogate q_t(theta) using history H_t
+  e_a = argmax_e UCB_t(e)
+  if human expertise is unavailable:
+    e_selected = e_a
+  else:
+    e_b = argmax_{e in S_t \ {e_a}} UCB_t(e)
+    if overlap and uncertainty trigger conditions hold:
+      Z_t = kappa(e_a, e_b)
+      update posterior q'_t(theta) using preference likelihood
+      e_selected = argmax_{e in {e_a,e_b}} UCB_t(e)
+    else:
+      e_selected = e_a
+  Fit f on D_train plus e_selected; evaluate g(e_selected) on D_val plus e_selected
+  H_{t+1} = H_t union {(e_selected, g(e_selected))}
+  if g(e_selected) > 0:
+    append the new feature column to D_train and D_val
+return selected operations and updated datasets</code></pre>
+      </details>
+
+      <details>
+        <summary>LLM 生成候选的 prompt 模板</summary>
+        <pre><code>You are an expert data scientist with deep expertise in feature engineering.
+Dataset Context:
+- Task type: [CLASSIFICATION_OR_REGRESSION]
+- Metric: [ROC_AUC_OR_OTHER]
+- Columns (name:type): [COLS_WITH_TYPES]
+- Target: &lt;TARGET_NAME&gt;
+- Notes (missingness, skew, constraints): &lt;DATA_NOTES&gt;
+Recent performance feedback: [PERFORMANCE HISTORY]
+Remaining iteration budget: [BUDGET]
+
+Suggest up to K complementary NEW features as a JSON list.
+Each item includes:
+{
+  "name": "snake_case_identifier",
+  "explanation": "why this feature helps",
+  "reasoning": "what history pattern informs this choice",
+  "code": "feature = &lt;python expression using df[...] + helper ops&gt;",
+  "expected_benefit": "specific hypothesis"
+}
+
+Rules: no label leakage; avoid rejected patterns; build on successful features;
+combine multiple columns when useful; keep candidates diverse; return JSON only.</code></pre>
+      </details>
+
+      <details>
+        <summary>模拟人类专家偏好的 prompt 模板</summary>
+        <pre><code>You are a senior ML scientist specializing in tabular feature engineering.
+Use dataset context and SHAP-based feature importances to judge which of
+two candidate feature operations is more likely to improve the downstream metric.
+
+Prefer: high-SHAP columns, useful transformations, interactions, ratios,
+bins, complementary and robust features.
+Penalize: duplicated, noisy, fragile, or label-leaking features.
+
+Output JSON only:
+{ "choice": "A" | "B" }</code></pre>
+      </details>
+
+      <h3>数据集清单</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dataset</th><th>描述</th><th>#Features</th><th>#Instances</th><th>Task</th></tr></thead>
+          <tbody>
+            <tr><td>flight</td><td>基于航班计划与航空属性预测延误/满意度相关分类任务</td><td>22</td><td>25,976</td><td>Classification</td></tr>
+            <tr><td>wine</td><td>基于理化测试结果分类葡萄酒质量</td><td>11</td><td>945</td><td>Classification</td></tr>
+            <tr><td>loan</td><td>基于人口统计和财务属性预测贷款批准</td><td>13</td><td>45,000</td><td>Classification</td></tr>
+            <tr><td>diabetes</td><td>基于女性患者医疗测量诊断糖尿病</td><td>21</td><td>40,000</td><td>Classification</td></tr>
+            <tr><td>titanic</td><td>基于人口统计和票务信息预测 Titanic 生还</td><td>8</td><td>891</td><td>Classification</td></tr>
+            <tr><td>travel</td><td>预测客户是否购买旅游保险或提出 claim</td><td>8</td><td>63,326</td><td>Classification</td></tr>
+            <tr><td>ai usage</td><td>预测受访者是否报告使用 AI 工具</td><td>8</td><td>10,000</td><td>Classification</td></tr>
+            <tr><td>water</td><td>基于理化指标判断水是否可饮用</td><td>9</td><td>3,276</td><td>Classification</td></tr>
+            <tr><td>heart</td><td>基于临床测量诊断心脏病</td><td>11</td><td>918</td><td>Classification</td></tr>
+            <tr><td>adult</td><td>基于人口普查属性预测收入是否超过 $50K</td><td>14</td><td>32,561</td><td>Classification</td></tr>
+            <tr><td>customer</td><td>基于电信使用统计预测客户流失</td><td>20</td><td>7,043</td><td>Classification</td></tr>
+            <tr><td>personality</td><td>基于问卷回答预测 Big Five 人格类型</td><td>7</td><td>2,900</td><td>Classification</td></tr>
+            <tr><td>conversion</td><td>预测在线购物者是否转化购买，私有公司数据</td><td>178</td><td>15,000</td><td>Classification</td></tr>
+            <tr><td>housing</td><td>基于房屋信息预测房价</td><td>9</td><td>20,640</td><td>Regression</td></tr>
+            <tr><td>forest</td><td>基于地理信息预测森林火灾 burned area</td><td>12</td><td>517</td><td>Regression</td></tr>
+            <tr><td>bike</td><td>基于天气与日历信息预测每日自行车租赁数</td><td>9</td><td>17,414</td><td>Regression</td></tr>
+            <tr><td>crab</td><td>基于生物测量预测螃蟹年龄</td><td>8</td><td>3,893</td><td>Regression</td></tr>
+            <tr><td>insurance</td><td>预测保险费用</td><td>6</td><td>1,339</td><td>Regression</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="section-head">
+        <span class="kicker">Results</span>
+        <h2>实验结果：主要收益来自“会选”，人类反馈进一步推高上限。</h2>
+      </div>
+      <div class="plain">
+        <p><strong>先看结论：</strong>Ours w/o human 已经普遍超过 baseline，说明 BNN+UCB 的选择机制本身有效；Ours w/ human 通常更高，说明在关键不确定时加入人类偏好还能继续提升。</p>
+      </div>
+
+      <h3>分类主结果：Table 1，AUROC (%)</h3>
+      <p class="note">下表保留论文 Table 1 的具体数值。蓝色为该行最佳本文方法；绿色为最佳 baseline。括号为相对最佳 baseline 的 error reduction。</p>
+      <div class="analogy">
+        <p><strong>表格怎么看：</strong>AUROC 越高越好。你可以横着看每个数据集：如果 Ours w/o 或 Ours w/ 比 OpenFE、AutoGluon、CAAFE、OCTree 更高，就说明本文方法造出的特征让模型区分正负样本的能力更强。</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dataset</th><th>MLP OpenFE</th><th>MLP AutoGluon</th><th>MLP CAAFE</th><th>MLP OCTree</th><th>MLP Ours w/o</th><th>MLP Ours w/</th><th>XGB OpenFE</th><th>XGB AutoGluon</th><th>XGB CAAFE</th><th>XGB OCTree</th><th>XGB Ours w/o</th><th>XGB Ours w/</th></tr></thead>
+          <tbody>
+            <tr><td>flight</td><td>93.3</td><td>92.6</td><td>92.9</td><td class="baseline">94.8</td><td>96.9 (+40.4%)</td><td class="best">97.3 (+48.1%)</td><td>95.7</td><td>95.4</td><td>95.2</td><td class="baseline">96.4</td><td>97.6 (+33.3%)</td><td class="best">98.0 (+44.4%)</td></tr>
+            <tr><td>wine</td><td>77.2</td><td>77.2</td><td>77.6</td><td class="baseline">78.2</td><td>78.5 (+1.4%)</td><td class="best">78.7 (+2.3%)</td><td>81.3</td><td>81.0</td><td>80.9</td><td class="baseline">82.1</td><td>82.9 (+4.5%)</td><td class="best">83.3 (+6.7%)</td></tr>
+            <tr><td>loan</td><td>95.3</td><td>95.4</td><td>95.7</td><td class="baseline">95.9</td><td>96.0 (+2.4%)</td><td class="best">96.1 (+4.9%)</td><td>96.2</td><td>96.0</td><td>96.1</td><td class="baseline">96.5</td><td>96.9 (+11.4%)</td><td class="best">97.1 (+17.1%)</td></tr>
+            <tr><td>diabetes</td><td>81.1</td><td>82.4</td><td class="baseline">82.8</td><td class="baseline">82.8</td><td class="best">83.0 (+1.2%)</td><td class="best">83.0 (+1.2%)</td><td>84.1</td><td>83.9</td><td>83.9</td><td class="baseline">84.4</td><td class="best">85.2 (+5.1%)</td><td>84.8 (+2.6%)</td></tr>
+            <tr><td>titanic</td><td>84.1</td><td>84.3</td><td>86.3</td><td class="baseline">86.5</td><td>86.8 (+2.2%)</td><td class="best">87.0 (+3.7%)</td><td>85.0</td><td>84.8</td><td>87.0</td><td class="baseline">87.4</td><td>87.9 (+4.0%)</td><td class="best">88.3 (+7.1%)</td></tr>
+            <tr><td>travel</td><td>80.4</td><td>80.3</td><td>81.1</td><td class="baseline">81.7</td><td>82.0 (+1.6%)</td><td class="best">82.3 (+3.3%)</td><td>83.6</td><td>83.2</td><td>83.6</td><td class="baseline">84.6</td><td>85.3 (+4.5%)</td><td class="best">85.7 (+7.1%)</td></tr>
+            <tr><td>aiusage</td><td>67.8</td><td>67.5</td><td class="baseline">68.2</td><td>68.0</td><td class="best">68.5 (+0.9%)</td><td>68.3 (+0.3%)</td><td>71.8</td><td>71.5</td><td>71.3</td><td class="baseline">72.4</td><td>73.3 (+3.3%)</td><td class="best">73.8 (+5.1%)</td></tr>
+            <tr><td>water</td><td>53.7</td><td>53.2</td><td>56.7</td><td class="baseline">57.9</td><td>58.7 (+1.9%)</td><td class="best">59.3 (+3.3%)</td><td>56.7</td><td>56.1</td><td>59.8</td><td class="baseline">61.7</td><td>63.2 (+3.9%)</td><td class="best">64.1 (+6.3%)</td></tr>
+            <tr><td>heart</td><td>92.2</td><td>92.3</td><td>92.6</td><td class="baseline">93.1</td><td>93.4 (+4.3%)</td><td class="best">93.6 (+7.2%)</td><td>93.6</td><td>93.5</td><td>93.6</td><td class="baseline">94.3</td><td class="best">95.1 (+14.0%)</td><td>94.8 (+8.8%)</td></tr>
+            <tr><td>adult</td><td>90.5</td><td>90.4</td><td>90.8</td><td class="baseline">90.9</td><td>91.3 (+4.4%)</td><td class="best">91.4 (+5.5%)</td><td>91.6</td><td>91.3</td><td>91.5</td><td class="baseline">92.0</td><td>92.4 (+5.0%)</td><td class="best">92.8 (+10.0%)</td></tr>
+            <tr><td>customer</td><td>84.6</td><td>84.5</td><td class="baseline">84.9</td><td>84.8</td><td class="best">85.1 (+1.3%)</td><td class="best">85.1 (+1.3%)</td><td class="baseline">85.3</td><td>85.0</td><td class="baseline">85.3</td><td>85.2</td><td>85.8 (+3.4%)</td><td class="best">86.3 (+6.8%)</td></tr>
+            <tr><td>personality</td><td>94.4</td><td>94.1</td><td>95.0</td><td class="baseline">95.4</td><td class="best">96.1 (+15.2%)</td><td class="best">96.1 (+15.2%)</td><td>96.4</td><td>96.2</td><td>96.6</td><td class="baseline">97.1</td><td>97.4 (+10.3%)</td><td class="best">97.6 (+17.2%)</td></tr>
+            <tr><td>conversion</td><td>90.7</td><td>90.6</td><td>90.9</td><td class="baseline">91.1</td><td>92.6 (+16.9%)</td><td class="best">92.9 (+20.2%)</td><td>91.2</td><td>91.9</td><td>92.1</td><td class="baseline">92.4</td><td>93.5 (+5.7%)</td><td class="best">93.9 (+11.5%)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid cols-3" style="margin-top:18px;">
+        <div class="card"><h3>平均分类收益</h3><p>MLP 下，Ours w/o human 对最佳 baseline 的平均 error reduction 为 <b>7.24%</b>，w/ human 为 <b>8.96%</b>。</p></div>
+        <div class="card"><h3>XGBoost 更明显</h3><p>XGBoost 下，Ours w/o human 为 <b>9.02%</b>，w/ human 为 <b>11.23%</b>。</p></div>
+        <div class="card"><h3>私有数据验证</h3><p>conversion 数据集不可被 LLM 训练语料直接记忆。MLP 下 OCTree 91.1，Ours w/ human 92.9。</p></div>
+      </div>
+
+      <h3>不同 LLM backbone：Table 2，平均 AUROC (%)</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Backbone</th><th>MLP OpenFE</th><th>MLP AutoGluon</th><th>MLP CAAFE</th><th>MLP OCTree</th><th>MLP Ours w/o</th><th>MLP Ours w/</th><th>XGB OpenFE</th><th>XGB AutoGluon</th><th>XGB CAAFE</th><th>XGB OCTree</th><th>XGB Ours w/o</th><th>XGB Ours w/</th></tr></thead>
+          <tbody>
+            <tr><td>DeepSeek-V3</td><td>83.5</td><td>83.5</td><td>84.9</td><td>85.5</td><td>86.1</td><td class="best">86.4</td><td>85.6</td><td>85.4</td><td>86.6</td><td>87.3</td><td>88.2</td><td class="best">88.6</td></tr>
+            <tr><td>GPT-3.5-Turbo</td><td>83.5</td><td>83.5</td><td>83.2</td><td>84.2</td><td>84.6</td><td class="best">85.1</td><td>85.6</td><td>85.4</td><td>85.2</td><td>86.0</td><td>86.5</td><td class="best">87.1</td></tr>
+            <tr><td>GPT-4o</td><td>83.5</td><td>83.5</td><td>84.3</td><td>84.7</td><td>85.3</td><td class="best">85.5</td><td>85.6</td><td>85.4</td><td>85.9</td><td>86.7</td><td class="best">87.4</td><td class="best">87.4</td></tr>
+            <tr><td>GPT-5</td><td>83.5</td><td>83.5</td><td>85.5</td><td>85.8</td><td>85.9</td><td class="best">86.5</td><td>85.6</td><td>85.4</td><td>87.1</td><td>87.7</td><td>88.0</td><td class="best">88.7</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>迭代轨迹与用户研究</h3>
+      <div class="grid cols-2">
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/human-llm-collaborative-feature-engineering/assets/figure_1_cropped.png" alt="Figure 1 cropped charts" />
+          <p class="caption">Figure 1：每条线表示一种方法随迭代轮数增加的 AUROC。黄色/红色是本文方法，整体比 CAAFE/OCTree 更快上升、更少停滞，说明它更会把有限迭代花在有价值的特征上。</p>
+        </div>
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/human-llm-collaborative-feature-engineering/assets/figure_2_cropped.png" alt="Figure 2 cropped charts" />
+          <p class="caption">Figure 2：真实用户研究。左图看最终 AUROC，ALG 更高；中图看完成时间，ALG 更短；右图看用户体验，ALG 的认知负荷更低、满意度更高。意思是本文方法不仅效果好，也让人更省力。</p>
+        </div>
+      </div>
+
+      <h3>可扩展性：Table 3/4</h3>
+      <div class="grid cols-2">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Features</th><th>LLM(s)</th><th>Surrogate(s)</th><th>UCB(s)</th><th>Eval(s)</th></tr></thead>
+            <tbody>
+              <tr><td>10</td><td>1.82</td><td>0.17</td><td>0.006</td><td>1.79</td></tr>
+              <tr><td>50</td><td>1.82</td><td>0.16</td><td>0.005</td><td>1.24</td></tr>
+              <tr><td>100</td><td>1.82</td><td>0.19</td><td>0.005</td><td>1.78</td></tr>
+              <tr><td>1,000</td><td>1.82</td><td>0.20</td><td>0.009</td><td>8.40</td></tr>
+              <tr><td>10,000</td><td>1.82</td><td>0.57</td><td>0.018</td><td>23.40</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Samples</th><th>LLM(s)</th><th>Surrogate(s)</th><th>UCB(s)</th><th>Eval(s)</th></tr></thead>
+            <tbody>
+              <tr><td>1,000</td><td>1.82</td><td>0.17</td><td>0.005</td><td>0.28</td></tr>
+              <tr><td>5,000</td><td>1.82</td><td>0.18</td><td>0.005</td><td>0.89</td></tr>
+              <tr><td>10,000</td><td>1.82</td><td>0.23</td><td>0.006</td><td>1.47</td></tr>
+              <tr><td>50,000</td><td>1.82</td><td>0.18</td><td>0.006</td><td>5.22</td></tr>
+              <tr><td>100,000</td><td>1.82</td><td>0.18</td><td>0.005</td><td>10.65</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <p class="note">作者结论：BNN surrogate 与 UCB 计算主要在 feature-operation 层面工作，对样本数几乎不敏感；瓶颈仍是 LLM 调用和下游模型评估。</p>
+
+      <h3>回归任务补充：Table C.2，normalized RMSE，越低越好</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dataset</th><th>MLP OpenFE</th><th>MLP AutoGluon</th><th>MLP CAAFE</th><th>MLP OCTree</th><th>MLP Ours w/o</th><th>MLP Ours w/</th><th>XGB OpenFE</th><th>XGB AutoGluon</th><th>XGB CAAFE</th><th>XGB OCTree</th><th>XGB Ours w/o</th><th>XGB Ours w/</th></tr></thead>
+          <tbody>
+            <tr><td>housing</td><td>0.316</td><td>0.319</td><td>0.292</td><td class="baseline">0.283</td><td>0.270</td><td class="best">0.266</td><td>0.228</td><td>0.231</td><td>0.224</td><td class="baseline">0.221</td><td>0.216</td><td class="best">0.214</td></tr>
+            <tr><td>forest</td><td>1.851</td><td>1.851</td><td>1.750</td><td class="baseline">1.724</td><td>1.655</td><td class="best">1.621</td><td>1.448</td><td>1.469</td><td>1.421</td><td class="baseline">1.418</td><td>1.402</td><td class="best">1.398</td></tr>
+            <tr><td>bike</td><td>0.295</td><td>0.302</td><td>0.282</td><td class="baseline">0.274</td><td>0.262</td><td class="best">0.261</td><td>0.216</td><td>0.219</td><td>0.211</td><td class="baseline">0.208</td><td>0.203</td><td class="best">0.201</td></tr>
+            <tr><td>crab</td><td>0.286</td><td>0.288</td><td>0.258</td><td class="baseline">0.252</td><td>0.242</td><td class="best">0.239</td><td>0.226</td><td>0.230</td><td>0.224</td><td class="baseline">0.222</td><td>0.219</td><td class="best">0.217</td></tr>
+            <tr><td>insurance</td><td>0.511</td><td>0.512</td><td>0.473</td><td class="baseline">0.462</td><td>0.467</td><td class="best">0.462</td><td>0.384</td><td>0.385</td><td>0.382</td><td class="baseline">0.381</td><td>0.379</td><td class="best">0.378</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="reproduce">
+      <div class="section-head">
+        <span class="kicker">Reproducibility</span>
+        <h2>复现路线：照这个 checklist 基本能搭出论文系统。</h2>
+      </div>
+      <div class="grid cols-2">
+        <div class="card">
+          <h3>实现组件</h3>
+          <p>1. 数据读取与 80/20 随机划分；2. 下游 MLP/XGBoost 训练评估；3. LLM JSON 候选生成器；4. 特征代码安全执行器；5. operation embedding；6. column usage encoder；7. BNN surrogate；8. UCB selector；9. preference oracle；10. 历史 \(H_t\) 与 accepted feature 管理。</p>
+        </div>
+        <div class="card">
+          <h3>关键超参数</h3>
+          <p>\(T=50\)，每轮候选 \(K=15\)，temperature \(=1\)，\(\delta=0.1\)，\(\gamma_\kappa=4\)，\(\eta=1\)，embedding model 为 <code>text-embedding-3-small</code>，BNN prior 为 \(P(\theta)=\mathcal{N}(0,I)\)。</p>
+        </div>
+      </div>
+      <details open>
+        <summary>论文给出的候选特征示例</summary>
+        <pre><code>digital_experience_tensor:
+gmean = (df['Inflight wifi service'] * df['Ease of Online booking'] * df['Online boarding']) ** (1/3)
+comfort = np.tanh((df['Seat comfort'] + df['Leg room service']) / 2.0)
+feature = (gmean * (df['Cleanliness'] ** 0.5)) * comfort
+
+age_weighted_health_interaction:
+feature = (df['Age'] * (df['HighBP'] + df['HighChol'] + df['HeartDiseaseorAttack'])) \
+          / (1 + df['Smoker'] * df['BMI'])
+
+lifestyle_risk_balance_enhanced:
+feature = (df['Fruits'] + df['Veggies'] + df['PhysActivity']) / \
+          (df['Smoker'] + df['HvyAlcoholConsump'] + df['NoDocbcCost'] + 1)</code></pre>
+      </details>
+    </section>
+
+    <section id="review">
+      <div class="section-head">
+        <span class="kicker">Reviewer Comments</span>
+        <h2>我的评论：想法漂亮，但证据链还有几处会被认真追问。</h2>
+      </div>
+      <div class="grid cols-2">
+        <div class="card good">
+          <h3>优势</h3>
+          <p>第一，问题定义非常到位：LLM 最大价值是 proposal，不是 calibrated optimizer。把选择权交给显式 surrogate，是很符合系统设计直觉的。</p>
+          <p>第二，选择性人类反馈不是装饰，而是嵌进 regret/uncertainty 框架里，有明确触发条件，避免“人在环”沦为口号。</p>
+          <p>第三，真实用户研究补上了只用 GPT-4o 模拟专家的缺口，显示 ALG 不只提高 AUROC，还降低时间和认知负荷。</p>
+        </div>
+        <div class="card review">
+          <h3>不足</h3>
+          <p>最尖锐的问题：主实验的 w/ human 用 GPT-4o+SHAP prompt 模拟人类专家，严格说这不是 human expertise，而是另一个 LLM oracle。它证明了 preference signal 有用，但没有完全证明真实专家在多数据集上同样有用。</p>
+          <p>第二，\(g(e)>0\) 才接受新特征的规则依赖“utility 是否相对基线定义为增益”。论文公式写的是验证得分 \(J\)，这里存在表述不够严谨的问题。</p>
+          <p>第三，BNN 的结构、训练细节、优化轮数、MC 采样数没有在抽取到的正文中充分展开；若要完全复现，仍需作者代码或更详细 appendix。</p>
+        </div>
+        <div class="card warn">
+          <h3>可能改进</h3>
+          <p>可以加入 ablation：只用 embedding、不用 column encoder；GP/随机森林/深度 ensemble 作为 surrogate；不同 \(\gamma_\kappa\) 下的人类查询次数与收益曲线。</p>
+          <p>还应报告 feature execution failure rate、重复特征率、候选合法性，以及每轮实际触发人类反馈的比例。否则很难判断 gains 来自 selection、filtering 还是代码执行策略。</p>
+        </div>
+        <div class="card">
+          <h3>我会怎么打分</h3>
+          <p>作为 ICLR 论文，我会倾向 weak accept 到 accept：核心 framing 很强，实验覆盖面不错，用户研究加分；但模拟人类反馈和复现细节不足会压低置信度。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="one-more-thing">
+      <div class="thing">
+        <div>
+          <span class="kicker" style="color:rgba(255,255,255,.68)">One More Thing</span>
+          <h2>这篇论文真正有意思的地方，是它把“LLM agent”重新拆回了可控系统。</h2>
+          <p>
+            它没有继续堆更强 prompt 或更强模型，而是问：LLM 哪部分能力可靠，哪部分不可靠？
+            答案是：生成候选可靠一些，评估与选择不可靠。于是系统把 LLM 放在高召回的生成位置，把选择交给 uncertainty-aware optimization，把人类放在低频但高杠杆的 pairwise 判断位置。
+            这比“让 LLM 端到端自治”更像一个能进生产环境的研究方向。
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/">http://nanamiakari.github.io/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/">结构化数据</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">LLMStructBench: 结构化数据抽取基准</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">LLMStructBench: 结构化数据抽取基准</div></div></a></div><div><a href="/2026/05/02/PaperReadings/schematiq/" title="ScheMatiQ: 从研究问题到可验证数据表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">ScheMatiQ: 从研究问题到可验证数据表</div></div></a></div><div><a href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">SCHEMA-MINERpro: 让机器读懂科学实验流程</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程">SCHEMA-MINERpro: 让机器读懂科学实验流程</a><time datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格">Docs2Table: 从多文档到结构化表格</a><time datetime="2026-05-13T07:48:15.000Z" title="发表于 2026-05-13 15:48:15">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分">CONSTRUCT: 结构化输出的实时可信度评分</a><time datetime="2026-05-07T02:37:02.000Z" title="发表于 2026-05-07 10:37:02">2026-05-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准">LLMStructBench: 结构化数据抽取基准</a><time datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

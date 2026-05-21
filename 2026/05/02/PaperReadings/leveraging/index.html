@@ -1,0 +1,773 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Leveraging LLMs for Cloud Incident Extraction | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ICPE Companion 2026 · Work in Progress Paper       用 LLM 把云故障报告变成可分析数据。       论文《Leveraging LLMs for Structured Information Extraction and Analysis from Cloud Incident Reports》试图解决一个很实在的问">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Leveraging LLMs for Cloud Incident Extraction">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/02/PaperReadings/leveraging/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="ICPE Companion 2026 · Work in Progress Paper       用 LLM 把云故障报告变成可分析数据。       论文《Leveraging LLMs for Structured Information Extraction and Analysis from Cloud Incident Reports》试图解决一个很实在的问">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-02T09:35:36.000Z">
+<meta property="article:modified_time" content="2026-05-20T12:42:58.782Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="结构化数据">
+<meta property="article:tag" content="AIOps">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/02/PaperReadings/leveraging/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Leveraging LLMs for Cloud Incident Extraction',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-20 20:42:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Leveraging LLMs for Cloud Incident Extraction</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-02T09:35:36.000Z" title="发表于 2026-05-02 17:35:36">2026-05-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-20T12:42:58.782Z" title="更新于 2026-05-20 20:42:58">2026-05-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2.5k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Leveraging LLMs for Cloud Incident Extraction"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-leveraging">
+<header class="hero">
+    <div class="hero-inner">
+      <div class="eyebrow">ICPE Companion 2026 · Work in Progress Paper</div>
+      <h2 class="paper-main-title">用 LLM 把云故障报告变成可分析数据。</h2>
+      <p class="sub">论文《Leveraging LLMs for Structured Information Extraction and Analysis from Cloud Incident Reports》试图解决一个很实在的问题：AWS、Azure、GCP 的公开 incident reports 很长、结构不一、难以长期统计。作者构建数据集、标注 460 条样本、比较 6 个模型和 6 种 prompt 策略，给出准确率、延迟和成本的系统评估。</p>
+      <div class="hero-grid">
+        <div class="metric"><div class="num">3,087</div><div class="label">来自 AWS、Azure、GCP 的公开故障报告</div></div>
+        <div class="metric"><div class="num">460</div><div class="label">人工标注样本，用作 ground truth</div></div>
+        <div class="metric"><div class="num">6 × 6</div><div class="label">6 个 LLM × 6 种 prompt 策略</div></div>
+        <div class="metric"><div class="num">75–95%</div><div class="label">metadata extraction 的主要准确率区间</div></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="motivation">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Research Motivation</div>
+          <h2>问题不是“LLM 会不会抽取”，而是“怎样可靠、便宜、可复现地抽取”。</h2>
+        </div>
+        <p class="lead">云厂商会公开 incident reports，里面包含服务名、区域、时间、用户症状、根因等信息。但这些报告是自然语言文本，跨厂商格式差异很大，导致研究者和 SRE 很难做 longitudinal analysis。本文的 significance 在于把“公开故障文本”转成“可评估、可比较、可复用的结构化数据抽取任务”。</p>
+        <div class="grid-3">
+          <div class="panel">
+            <h3>挑战 1：没有公开标注数据</h3>
+            <p>已有云故障研究多依赖人工或规则抽取。作者指出 Azure 和 GCP 平均报告长度超过 500 words，手工处理成本高，也很难规模化复现。</p>
+          </div>
+          <div class="panel">
+            <h3>挑战 2：缺少方法学评估</h3>
+            <p>LLM 常用于信息抽取，但在 cloud incident reports 上如何设计 prompt、选择模型、衡量成本与延迟，仍缺少系统比较。</p>
+          </div>
+          <div class="panel">
+            <h3>挑战 3：长期统计受阻</h3>
+            <p>如果不能稳定抽取服务、时间、症状、根因类别，就很难回答“哪些服务最常出问题”“故障持续多久”“用户影响是什么”等运维问题。</p>
+          </div>
+        </div>
+
+        <div class="figure">
+          <h3>Table 1 · 云故障报告数据集概览</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Name</th><th>Period</th><th class="num"># Rows</th><th class="num"># Labeled</th><th class="num">Avg. Words</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>AWS</td><td>2016–2022</td><td class="num">774</td><td class="num">150 (19%)</td><td class="num">151</td></tr>
+                <tr><td>2</td><td>AZURE</td><td>2019–2024</td><td class="num">127</td><td class="num">95 (75%)</td><td class="num">575</td></tr>
+                <tr><td>3</td><td>GCP</td><td>2016–2021</td><td class="num">2,186</td><td class="num">215 (10%)</td><td class="num">533</td></tr>
+                <tr><td></td><td><b>TOTAL</b></td><td>2016–2024</td><td class="num"><b>3,087</b></td><td class="num"><b>460 (15%)</b></td><td class="num">-</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="caption">原论文 Table 1。注意三个数据源差异明显：AWS 短、Azure/GCP 长；GCP 数量最大但标注比例最低。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="modeling">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Mathematical Representation & Modeling</div>
+          <h2>把报告 \(r_i\) 映射成结构化 JSON，再按字段类型选择评价函数。</h2>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>任务形式化</h3>
+            <p>给定第 \(i\) 条 incident report 文本 \(r_i\)，LLM 在 prompt \(p_s\) 和 system prompt \(p_{\mathrm{sys}}\) 的条件下输出结构化结果 \(\hat{y}_i\)：</p>
+            <div class="formula">\[
+              \hat{y}_i = f_{\theta}(p_{\mathrm{sys}}, p_s, r_i), \quad
+              \hat{y}_i \in \mathcal{Y}_{\mathrm{entity}} \times \mathcal{Y}_{\mathrm{class}} \times \mathcal{Y}_{\mathrm{text}}
+            \]</div>
+            <p>其中 \(f_{\theta}\) 是候选 LLM，\(p_s\) 是六种 prompt strategy 中的一种。输出要求为 JSON，核心字段包括 service name、location、start/end time、timezone、service category、user symptom category、user symptom，以及 Azure 可用的 root cause category/root cause。</p>
+          </div>
+          <div class="panel">
+            <h3>评价函数</h3>
+            <p>实体和单标签分类字段用 Exact Match；多标签 user symptom category 用 Token-level F1；自由文本 user symptom/root cause 用 BERTScore。</p>
+            <div class="formula">\[
+              \mathrm{EM}(\hat{y}, y)=\mathbf{1}[\mathrm{norm}(\hat{y})=\mathrm{norm}(y)]
+            \]</div>
+            <div class="formula">\[
+              P=\frac{|T(\hat{y})\cap T(y)|}{|T(\hat{y})|},\quad
+              R=\frac{|T(\hat{y})\cap T(y)|}{|T(y)|},\quad
+              \mathrm{F1}=\frac{2PR}{P+R}
+            \]</div>
+            <div class="formula">\[
+              \mathrm{Cost}=\frac{n_{\mathrm{in}}c_{\mathrm{in}}+n_{\mathrm{out}}c_{\mathrm{out}}}{10^6}
+            \]</div>
+          </div>
+        </div>
+
+        <div class="figure">
+          <h3>Figure 1 · LLM-based extraction workflow</h3>
+          <div class="workflow">
+            <div class="node"><strong>A. Sample Reports</strong><span>K-means 抽样与人工标注</span></div>
+            <div class="arrow">→</div>
+            <div class="node"><strong>B. Prompt Template</strong><span>System prompt + user prompt</span></div>
+            <div class="arrow">→</div>
+            <div class="node"><strong>C. Candidate LLMs</strong><span>OpenAI / Claude / Gemini</span></div>
+            <div class="arrow">→</div>
+            <div class="node"><strong>D. JSON Response</strong><span>结构化抽取结果</span></div>
+            <div class="arrow">→</div>
+            <div class="node"><strong>E. Evaluation</strong><span>与 labeled results 对比</span></div>
+          </div>
+          <div class="caption">根据原论文 Figure 1 重绘。最终步骤 \(F\) 是选择模型后对全量报告执行 extraction and analysis。</div>
+        </div>
+
+        <div class="figure">
+          <h3>Table 2 · 抽取字段、类型与评价指标</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Extracted Fields</th><th>Type</th><th>AWS</th><th>AZURE</th><th>GCP</th><th>Metric</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Service Name</td><td>entity</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>2</td><td>Location</td><td>entity</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>3</td><td>Start Time</td><td>entity</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>4</td><td>End Time</td><td>entity</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>5</td><td>Timezone</td><td>entity</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>6</td><td>Service Category</td><td>class</td><td>✓</td><td>✓</td><td>✓</td><td>EM</td></tr>
+                <tr><td>7</td><td>Root Cause Category</td><td>class</td><td>-</td><td>✓</td><td>-</td><td>EM</td></tr>
+                <tr><td>8</td><td>User Symptom Category</td><td>multi-class</td><td>✓</td><td>✓</td><td>✓</td><td>TK</td></tr>
+                <tr><td>9</td><td>User Symptom</td><td>text</td><td>✓</td><td>✓</td><td>✓</td><td>BS</td></tr>
+                <tr><td>10</td><td>Root Cause</td><td>text</td><td>-</td><td>✓</td><td>-</td><td>BS</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="caption">原 PDF 抽取的表格符号有编码损坏；这里按正文语义重建。论文强调部分字段直接从报告中抽取，类别字段由 LLM 推断。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="experiments">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Experimental Design</div>
+          <h2>复现实验的关键，是数据处理、标注、prompt 组合、模型成本四件事。</h2>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>数据处理流水线</h3>
+            <ol class="checklist">
+              <li>从 AWS、Azure、GCP 状态页抓取 HTML 形式的 incident reports。</li>
+              <li>按厂商分别清洗，去除 None values、duplicates 和无效记录，统一成可合并结构。</li>
+              <li>用 K-means clustering 选择 representative sample datasets，降低人工标注成本。</li>
+              <li>3 名具备 computer systems 背景的研究者标注：Annotator 1/2 独立标注并对齐，无法达成一致时由 Annotator 3 仲裁。</li>
+            </ol>
+          </div>
+          <div class="panel">
+            <h3>模型配置 · Table 3</h3>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Alias</th><th>Type / Name</th><th class="num">Input $/10^6T</th><th class="num">Output $/10^6T</th></tr></thead>
+                <tbody>
+                  <tr><td>GPT 4o</td><td>S / gpt-4o*</td><td class="num">2.50</td><td class="num">10.00</td></tr>
+                  <tr><td>GPT 3.5</td><td>L / gpt-3.5-turbo*</td><td class="num">0.50</td><td class="num">1.50</td></tr>
+                  <tr><td>Claude Sonnet 4</td><td>S / claude-sonnet-4-20250514</td><td class="num">3.00</td><td class="num">15.00</td></tr>
+                  <tr><td>Claude 3.5</td><td>L / claude-3-5-haiku-20241022</td><td class="num">0.80</td><td class="num">4.00</td></tr>
+                  <tr><td>Gemini 2.5</td><td>S / gemini-2.5-pro*</td><td class="num">1.25</td><td class="num">10.00</td></tr>
+                  <tr><td>Gemini 2.0</td><td>L / gemini-2.0-flash*</td><td class="num">0.10</td><td class="num">0.40</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="muted">L 表示 lightweight，S 表示 state-of-the-art。带 * 的模型不提供 time fingerprint，论文只报告运行日期。</p>
+          </div>
+        </div>
+
+        <div class="figure">
+          <h3>Prompt Engineering · Table 4 + Figure 2</h3>
+          <p>作者定义 5 个 prompt components：Task、CoT、Category、Examples、Format，并组合成 6 种策略。</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Label</th><th>Components</th><th>含义</th></tr></thead>
+              <tbody>
+                <tr><td>Full-ZS</td><td>Task + CoT + Category + Format</td><td>完整指令，无示例</td></tr>
+                <tr><td>Full-FS</td><td>Task + CoT + Category + Examples + Format</td><td>完整指令，两条 few-shot examples</td></tr>
+                <tr><td>Basic-ZS</td><td>Task + Format</td><td>最小可用 prompt</td></tr>
+                <tr><td>Basic-FS</td><td>Task + Examples + Format</td><td>最小 prompt 加示例</td></tr>
+                <tr><td>CoT-ZS</td><td>Task + CoT + Format</td><td>只加入 step-by-step reasoning</td></tr>
+                <tr><td>Categ-ZS</td><td>Task + Category + Format</td><td>只加入类别定义</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="prompt-grid" style="margin-top:16px">
+            <div class="prompt-block"><b>Task</b><pre>Analyze the incident report step by step to extract structured information.</pre></div>
+            <div class="prompt-block"><b>CoT</b><pre>1. Identify service name and location.
+2. Select one service category from {service_category_lst}.
+3. Extract symptom sentences, then select user symptom categories from {user_symp_lst}.
+4. Identify start time, end time, timezone. Format times as "HH:MM:SS".</pre></div>
+            <div class="prompt-block"><b>Category</b><pre>The definition for user symptom category are: {user_symp_instruction}.</pre></div>
+            <div class="prompt-block"><b>Format</b><pre>Return JSON with keys:
+service_name, location, service_category, start_time, end_time, timezone,
+user_symptom, user_symptom_category.</pre></div>
+            <div class="prompt-block"><b>Examples</b><pre>Q: title: Amazon CloudWatch (Ireland) ... delayed CloudWatch metrics ...
+A: {"service_name":"Amazon CloudWatch","location":"Ireland","service_category":"management","start_time":"10:26:00","end_time":"14:40:00","timezone":"PST","user_symptom_category":"DELAY", ...}</pre></div>
+          </div>
+          <div class="caption">根据原论文 Figure 2 复刻。实际模板会因厂商报告结构不同而略有变化。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="results">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Results & Core Findings</div>
+          <h2>Few-shot 常常有效，但“更强模型更好”并不总成立。</h2>
+        </div>
+
+        <div class="figure">
+          <h3>Table 5 · GPT-3.5 在 AWS 上的 prompt 策略对比</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Field / Prompt</th><th>Metric</th><th class="num">Full-ZS</th><th class="num">Full-FS</th><th class="num">Basic-ZS</th><th class="num">Basic-FS</th><th class="num">CoT-ZS</th><th class="num">Categ-ZS</th></tr></thead>
+              <tbody>
+                <tr><td>Service Name</td><td>EM</td><td class="num">86.00</td><td class="num best">100.00</td><td class="num worst">52.00</td><td class="num best">100.00</td><td class="num">83.33</td><td class="num">60.67</td></tr>
+                <tr><td>Location</td><td>EM</td><td class="num">48.00</td><td class="num best">96.67</td><td class="num worst">38.00</td><td class="num">83.33</td><td class="num">57.33</td><td class="num">44.67</td></tr>
+                <tr><td>Start Time</td><td>EM</td><td class="num">86.00</td><td class="num best">91.33</td><td class="num worst">70.00</td><td class="num">89.33</td><td class="num">83.33</td><td class="num">72.00</td></tr>
+                <tr><td>End Time</td><td>EM</td><td class="num">83.33</td><td class="num best">86.00</td><td class="num worst">64.00</td><td class="num best">86.00</td><td class="num">78.67</td><td class="num">71.33</td></tr>
+                <tr><td>Timezone</td><td>EM</td><td class="num best">98.67</td><td class="num best">98.67</td><td class="num best">98.67</td><td class="num best">98.67</td><td class="num best">98.67</td><td class="num best">98.67</td></tr>
+                <tr><td>Service Categ.</td><td>EM</td><td class="num">77.33</td><td class="num">71.33</td><td class="num">64.67</td><td class="num">76.00</td><td class="num best">80.00</td><td class="num worst">61.33</td></tr>
+                <tr><td>User Symptom Categ.</td><td>TK</td><td class="num">88.50</td><td class="num">88.94</td><td class="num">9.76</td><td class="num">50.19</td><td class="num worst">9.33</td><td class="num best">90.00</td></tr>
+                <tr><td>User Symptom</td><td>BS</td><td class="num">84.33</td><td class="num">92.90</td><td class="num">84.79</td><td class="num best">93.79</td><td class="num">83.09</td><td class="num worst">81.63</td></tr>
+                <tr><td><b>Overall</b></td><td>Average</td><td class="num">71.08</td><td class="num best">79.23</td><td class="num worst">49.74</td><td class="num">73.60</td><td class="num">61.44</td><td class="num">62.44</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="caption">Finding 1：Full-FS 总体最佳，Basic-FS 比 Basic-ZS 提高近 24 个百分点，说明 in-context examples 是最有效的单个组件。</div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" data-tab="aws">AWS</button>
+          <button class="tab" data-tab="azure">AZURE</button>
+          <button class="tab" data-tab="gcp">GCP</button>
+        </div>
+        <div id="aws" class="tab-panel active"></div>
+        <div id="azure" class="tab-panel"></div>
+        <div id="gcp" class="tab-panel"></div>
+
+        <div class="grid-3" style="margin-top:22px">
+          <div class="panel"><h3>Finding 2</h3><p>Few-shot 在多数 metadata 字段上提升准确率，最高平均提升 17.34%。但对 service/root category 并不稳定，有时反而下降。</p></div>
+          <div class="panel"><h3>Finding 3</h3><p>轻量模型有时超过先进模型。Azure 上 Gemini 2.0 few-shot 平均 \(80.60\%\)，高于 Gemini 2.5 few-shot 的 \(77.90\%\)。</p></div>
+          <div class="panel"><h3>Finding 4</h3><p>Few-shot-CoT 输入 token 多 \(1.5\text{–}2\times\)，但可能更低延迟，因为示例约束输出格式，减少 output tokens。</p></div>
+          <div class="panel"><h3>Finding 5</h3><p>最贵模型比最便宜模型贵 \(50\text{–}60\times\)。Azure 上 Claude 4 few-shot 成本为 \(190.54\times10^{-4}\) 美元，而 Gemini 2.0 zero/few-shot 仅 \(3.10/4.27\times10^{-4}\) 美元。</p></div>
+          <div class="panel"><h3>Finding 6</h3><p>实际选型建议：先用 Gemini 2.0 或 GPT-3.5 + few-shot；只有在准确率硬需求更高时再考虑 GPT-4o/Gemini 2.5。</p></div>
+          <div class="panel"><h3>关键洞察</h3><p>LLM extraction 不是单调 scaling 问题。报告格式、字段类型、few-shot 示例、输出长度共同决定 accuracy-cost-latency trade-off。</p></div>
+        </div>
+
+        <div class="figure">
+          <h3>Figure 3 · Accuracy-Cost trade-off 重绘</h3>
+          <div class="scatter">
+            <div class="plot"><div class="plot-title">AWS</div><svg viewBox="0 0 260 180" data-plot="aws"></svg></div>
+            <div class="plot"><div class="plot-title">AZURE</div><svg viewBox="0 0 260 180" data-plot="azure"></svg></div>
+            <div class="plot"><div class="plot-title">GCP</div><svg viewBox="0 0 260 180" data-plot="gcp"></svg></div>
+          </div>
+          <div class="legend"><span><i class="dot" style="background:#0071e3"></i>zero-shot</span><span><i class="dot" style="background:#f5a524"></i>few-shot</span><span>虚线：平均成本与平均准确率</span></div>
+          <div class="caption">根据原论文 Figure 3 的坐标范围与均值线重绘。上左区域代表更高准确率、更低成本。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="review" class="review">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Reviewer Comments</div>
+          <h2>我的锐评：选题很对，但实验还停在“prompt benchmark”的第一层。</h2>
+        </div>
+        <div class="grid-2">
+          <div class="panel">
+            <h3>优点</h3>
+            <ul class="dense">
+              <li>问题真实，数据有价值。公开 cloud incident reports 是 AIOps 研究里被低估的数据源，作者把它做成可评估任务，这一步很重要。</li>
+              <li>实验维度完整：数据源、字段类型、模型、prompt、accuracy、latency、cost 都覆盖了，结论对工程选型有直接参考意义。</li>
+              <li>开源数据和工具链符合 FAIR，这让后续研究可以真正复现并扩展，而不是只停留在封闭 benchmark。</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>不足</h3>
+            <ul class="dense">
+              <li>分类体系偏 closed-world。service/root/symptom category 如果预设不够细，EM 再高也可能掩盖信息损失。</li>
+              <li>few-shot 示例选择没有被充分控制。作者承认样例数量与内容影响很大，但没有系统比较 retrieval-based examples、diversity sampling、hard cases。</li>
+              <li>对“语义正确”的评估偏弱。BERTScore 适合粗略相似度，但 incident root cause/symptom 的事实一致性需要 entailment 或人工审计。</li>
+              <li>缺少置信度与失败模式分析。生产系统更关心何时该相信抽取结果、何时交给人工，而不是只有平均准确率。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <h3>我会怎么改进</h3>
+          <p class="muted">第一，加入 schema-constrained decoding 或 function calling，减少 JSON 格式错误并约束字段类型。第二，用 retrieval-based few-shot：对每条报告检索相似厂商、相似服务、相似症状的标注样例，而不是固定两条 example。第三，做 calibration：让模型输出 evidence span、confidence 和 abstention，当 evidence 不足时返回 unknown。第四，把评估从 field-level 扩展到 incident-level utility，例如 duration prediction、service-risk ranking、root-cause trend analysis，证明结构化抽取真的提升下游运维决策。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="more">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">One More Thing</div>
+          <h2>这篇论文真正有意思的地方，是它暗示了“公开 incident intelligence layer”。</h2>
+        </div>
+        <p class="lead">如果把 AWS/Azure/GCP/LLM 服务商的公开故障报告持续抓取、结构化、去重、归因，再结合服务依赖图和区域拓扑，就能构建一个跨云的 incident intelligence layer。它不只是论文数据集，而可能成为云可靠性研究、SRE 风险建模、供应商 SLA 审计的基础设施。</p>
+        <div class="grid-3">
+          <div class="panel"><h3>可复现实验清单</h3><p>下载作者 GitHub/Zenodo 数据；按厂商清洗；K-means 抽样；复用 Table 2 schema；生成六种 prompt；对 6 个模型记录 JSON、token、latency；按 EM/TK/BS 计算字段级指标。</p></div>
+          <div class="panel"><h3>最值得复查的点</h3><p>类别定义、few-shot 样例、时间归一化、timezone 处理、BERTScore 对事实错误的容忍、Azure root cause 与 AWS/GCP 信息缺失造成的跨厂商不可比。</p></div>
+          <div class="panel"><h3>一句话结论</h3><p>这项工作不是证明 LLM “聪明”，而是证明在受约束 schema、合适 few-shot、成本敏感评估下，LLM 可以成为 incident-report 数据工程的实用组件。</p></div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/02/PaperReadings/leveraging/">http://nanamiakari.github.io/2026/05/02/PaperReadings/leveraging/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/">结构化数据</a><a class="post-meta__tags" href="/tags/AIOps/">AIOps</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/02/PaperReadings/schematiq/" title="ScheMatiQ: 从研究问题到可验证数据表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">ScheMatiQ: 从研究问题到可验证数据表</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">LLMStructBench: 结构化数据抽取基准</div></div></a></div><div><a href="/2026/05/02/PaperReadings/schematiq/" title="ScheMatiQ: 从研究问题到可验证数据表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">ScheMatiQ: 从研究问题到可验证数据表</div></div></a></div><div><a href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">SCHEMA-MINERpro: 让机器读懂科学实验流程</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程">SCHEMA-MINERpro: 让机器读懂科学实验流程</a><time datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格">Docs2Table: 从多文档到结构化表格</a><time datetime="2026-05-13T07:48:15.000Z" title="发表于 2026-05-13 15:48:15">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分">CONSTRUCT: 结构化输出的实时可信度评分</a><time datetime="2026-05-07T02:37:02.000Z" title="发表于 2026-05-07 10:37:02">2026-05-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准">LLMStructBench: 结构化数据抽取基准</a><time datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>SCHEMA-MINERpro: 让机器读懂科学实验流程 | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="这篇论文想让机器真正读懂科学实验流程。论文里的实验步骤原本是一段段自然语言。SCHEMA-MINERpro 做的事，是把它们整理成标准化 schema，再把温度、压力、时间、能量这些字段连到 QUDT 本体，让它们可以被搜索、比较和复用。一句话它把“论文里写的实验描述”变成“机器能懂的实验卡片”。LLM 读论文专家纠错Agent 对齐本体QUDT 统一单位最核心的价值以后你可以问机器：“找出所有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SCHEMA-MINERpro: 让机器读懂科学实验流程">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/13/PaperReadings/schema-minerpro/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="这篇论文想让机器真正读懂科学实验流程。论文里的实验步骤原本是一段段自然语言。SCHEMA-MINERpro 做的事，是把它们整理成标准化 schema，再把温度、压力、时间、能量这些字段连到 QUDT 本体，让它们可以被搜索、比较和复用。一句话它把“论文里写的实验描述”变成“机器能懂的实验卡片”。LLM 读论文专家纠错Agent 对齐本体QUDT 统一单位最核心的价值以后你可以问机器：“找出所有">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-13T07:50:48.000Z">
+<meta property="article:modified_time" content="2026-05-20T12:42:58.822Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="结构化数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/13/PaperReadings/schema-minerpro/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'SCHEMA-MINERpro: 让机器读懂科学实验流程',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-20 20:42:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">SCHEMA-MINERpro: 让机器读懂科学实验流程</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-20T12:42:58.822Z" title="更新于 2026-05-20 20:42:58">2026-05-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>6分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-schema-minerpro">
+<header class="hero"><div class="wrap"><div class="eyebrow"></div><h2 class="paper-main-title">这篇论文想让机器真正读懂科学实验流程。</h2><p class="subtitle">论文里的实验步骤原本是一段段自然语言。SCHEMA-MINERpro 做的事，是把它们整理成标准化 schema，再把温度、压力、时间、能量这些字段连到 QUDT 本体，让它们可以被搜索、比较和复用。</p><div class="heroCards"><div class="bigCard"><h2>一句话</h2><p>它把“论文里写的实验描述”变成“机器能懂的实验卡片”。</p><span class="pill">LLM 读论文</span><span class="pill">专家纠错</span><span class="pill">Agent 对齐本体</span><span class="pill">QUDT 统一单位</span></div><div class="bigCard"><h2>最核心的价值</h2><p>以后你可以问机器：“找出所有低于 (200^\circ C)、使用 TMA precursor 的 ALD 实验”，而不是人工一篇篇翻论文。</p></div></div></div></header>
+<section id="story"><h2 class="title">先看一个例子</h2><p class="lead">假设一篇 ALD 论文里有一句话：</p><div class="example"><div class="box"><h3>论文原文</h3><p>The Al₂O₃ film was deposited at 200 °C using trimethylaluminum and H₂O. The TMA pulse time was 0.1 s, followed by a 5 s N₂ purge. The growth per cycle was 1.1 Å/cycle.</p></div><div class="arrow">→</div><div class="box"><h3>机器真正需要的结构</h3><pre class="miniCode">process: Atomic Layer Deposition
+material: Al2O3
+precursors: TMA, H2O
+temperature: 200 °C
+pulse_time: 0.1 s
+purge_time: 5 s
+growth_per_cycle: 1.1 Å/cycle</pre></div></div><p class="twoLine">第一步只是把句子拆成字段。但这还不够，因为机器还不知道 <b>temperature</b> 是标准温度概念，也不知道 <b>°C</b> 应该如何和 Kelvin 互相转换。</p><div class="example"><div class="box"><h3>普通字段</h3><pre class="miniCode">temperature: 200 °C</pre></div><div class="arrow">→</div><div class="box"><h3>本体对齐后</h3><pre class="miniCode">temperature:
+  value: 200
+  unit: qudt:DEG_C
+  quantityKind: qudt:Temperature</pre></div></div><div class="callout">所以这篇文章不是简单地“抽几个关键词”。它要做的是：从科学文本中抽出结构，再让结构带上标准语义。</div></section>
+<section class="band" id="problem"><div class="inner"><h2 class="title">它解决了什么问题？</h2><p class="lead">科学论文对人友好，但对机器不友好。尤其是实验流程，常常写得很自然，却很难直接变成数据库或知识图谱。</p><div class="grid3"><div class="card"><h3>问题 1：字段不统一</h3><p>一篇论文写 temperature，另一篇写 substrate temperature，还有一篇写 temp。人知道差不多，机器不一定知道。</p></div><div class="card"><h3>问题 2：单位不统一</h3><p>温度可能是 °C 或 K，时间可能是 s 或 ms。没有标准化，跨论文比较就很麻烦。</p></div><div class="card"><h3>问题 3：LLM 会跑偏</h3><p>LLM 能生成 JSON，但可能漏字段、乱分组、过度细化，或者生成看似合理但专家不认可的结构。</p></div></div><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-01.png" alt="ALD ALE cycle"><figcaption>Figure 3：论文选择 ALD 和 ALE，因为它们都是半导体制造里的层级工艺，参数密集、单位重要，很适合检验 schema 是否真的有用。</figcaption></figure></div></section>
+<section id="method"><h2 class="title">它用了什么方法？</h2><p class="lead">方法可以理解成四步：先让 LLM 生成草稿，再用论文和专家反馈不断修正，最后让 agent 把字段连到标准本体。</p><div class="simpleFlow"><div class="step"><div class="num">1</div><h3>给一份工艺说明</h3><p>专家先写一个 process specification，告诉模型这个工艺大概是什么。</p></div><div class="step"><div class="num">2</div><h3>让 LLM 出 schema 草稿</h3><p>模型生成初始 JSON schema：有哪些字段、字段是什么意思、类型和单位是什么。</p></div><div class="step"><div class="num">3</div><h3>用论文和专家修正</h3><p>先用少量高质量论文精修，再用更多论文泛化；专家可以写意见，也可以直接改 schema。</p></div><div class="step"><div class="num">4</div><h3>Agent 做本体对齐</h3><p>把 temperature、pressure、energy、time 等字段连到 QUDT 的标准概念和单位。</p></div></div><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-02.png" alt="Workflow"><figcaption>Figure 1：三阶段 schema mining。Stage 1 生成初稿，Stage 2 用小规模精选论文修正，Stage 3 用大规模论文泛化。</figcaption></figure></section>
+<section class="band" id="agent"><div class="inner"><h2 class="title">Agent 到底在干什么？</h2><p class="lead">可以把 agent 想象成一个“本体对齐助理”。它不是重新读整篇论文，而是逐个检查 schema 字段，看这个字段能不能对齐到标准概念。</p><div class="grid2"><div class="card"><h3>简单字段：直接匹配</h3><p>比如 temperature、pressure、flow rate。agent 能直接在 QUDT 里找到对应的 QuantityKind 和 Unit。</p><pre class="miniCode">temperature → QUDT Temperature
+°C → QUDT DEG_C</pre></div><div class="card"><h3>复杂字段：语义搜索</h3><p>比如 growth per cycle。QUDT 里未必有同名概念，agent 会用 FAISS 找相关本体片段，再让 LLM 判断最接近的语义。</p><pre class="miniCode">growth_per_cycle
+→ related to Length / domain metric
+→ ask expert to confirm</pre></div></div><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-03.png" alt="Agent grounding"><figcaption>Figure 2：Agent grounding 流程。先做 lexical search，找不到再做 FAISS semantic search，最后把候选结果交给专家确认。</figcaption></figure><div class="callout warn">这一步最容易出错的地方不是“概念完全找不到”，而是“单位粒度不符合实验习惯”。论文里说，大约 30% 的单位建议需要专家修正。</div></div></section>
+<section id="math"><h2 class="title">公式其实可以这样理解</h2><p class="lead">不用被符号吓到。下面这些公式只是把刚才讲的流程写得更正式。</p><div class="grid2"><div class="card"><h3>Schema 怎么一步步变好</h3><p>每一轮 schema 都由上一轮 schema、当前论文资料、专家反馈共同决定：</p><div class="formula">$$S_t=f_\theta(D_t,S_{t-1},F_t),\quad t\in\{1,2,3\}$$</div><p>简单说：模型不是一次生成完，而是不断吸收资料和专家意见。</p></div><div class="card"><h3>字段怎么对齐本体</h3><p>一个字段先尝试直接匹配；不行就检索本体，再交给 LLM 判断：</p><div class="formula">$$G(p_i)=\begin{cases}m_i, & \text{direct match}\\\operatorname{LLM}(p_i,\operatorname{Retrieve}_k(p_i,O)), & \text{ambiguous}\\\varnothing, & \text{not a physical quantity}\end{cases}$$</div><p>简单说：容易的直接查，难的用语义搜索和 LLM。</p></div></div><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-04.png" alt="Quantity schema"><figcaption>Figure 4：Quantity 子 schema。它把 value、unit、quantityKind、sameAs URI 放到一个统一结构里。</figcaption></figure></section>
+<section class="band" id="exp"><div class="inner"><h2 class="title">实验怎么做？</h2><p class="lead">作者用 ALD 和 ALE 两种工艺测试系统，比较不同模型、不同专家反馈方式，以及 QUDT grounding 的效果。</p><div class="grid2"><div class="card"><h3>模型</h3><ul><li>GPT-4o</li><li>GPT-4-turbo</li><li>LLaMA 3.1 8B</li></ul></div><div class="card"><h3>反馈设置</h3><ul><li>只给自然语言反馈</li><li>只给专家修改后的 schema</li><li>两种反馈都给</li><li>不给专家反馈，作为 baseline</li></ul></div><div class="card"><h3>数据</h3><ul><li>Stage 1：专家写的工艺说明</li><li>Stage 2：约 1-10 篇精选论文</li><li>Stage 3：最高约 100 篇更大规模论文</li></ul></div><div class="card"><h3>评价</h3><ul><li>ROUGE-L、BLEU、BERTScore 比较 schema 文本相似度</li><li>专家评估 schema 是否合理</li><li>专家检查 QUDT grounding 是否正确</li></ul></div></div><h3>关键结果表：简化版</h3><div class="tableWrap"><table><tbody><tr><th>问题</th><th>结论</th><th>解释</th></tr><tr><td>哪种反馈最好？</td><td>自然语言反馈 + 直接 schema 编辑</td><td>文字提供语义解释，schema 编辑提供结构约束。</td></tr><tr><td>ALD 上谁更稳？</td><td>GPT-4o 和 LLaMA 3.1 8B</td><td>它们更能保持结构，不容易乱加字段。</td></tr><tr><td>ALE 上谁更稳？</td><td>GPT-4o 和 GPT-4-turbo</td><td>LLaMA 在大语料阶段更容易生成过度特化字段。</td></tr><tr><td>Agent grounding 准吗？</td><td>概念识别整体有效，但单位常需专家修</td><td>约 30% 的单位建议被专家调整，说明领域实践很重要。</td></tr></tbody></table></div><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-05.png" alt="ALD grounded schema"><figcaption>Figure 5：ALD 的 ontology-grounded schema 片段。</figcaption></figure><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-06.png" alt="ALE grounded schema"><figcaption>Figure 6：ALE 的 ontology-grounded schema 片段。</figcaption></figure></div></section>
+<section id="takeaway"><h2 class="title">最后记住这几句话就够了</h2><div class="grid3"><div class="card"><h3>它解决的不是阅读问题</h3><p>人本来就能读论文。它解决的是机器如何把论文变成可查、可比、可推理的数据。</p></div><div class="card"><h3>LLM 不是终点</h3><p>LLM 负责生成 schema 草稿，但专家反馈和 ontology grounding 才让结果可靠。</p></div><div class="card"><h3>本体对齐是关键</h3><p>只有字段连到 QUDT 这样的标准概念，跨论文、跨数据集比较才真正可行。</p></div></div></section>
+<section id="review"><div class="dark"><h2 class="title">我的锐评</h2><p class="lead">这篇工作的方向是对的，而且很务实。它知道科学 schema 不是靠 LLM 一句话就能生成的，需要专家、文献、本体和工具链一起工作。</p><div class="grid2"><div class="card"><h3>优点</h3><ul><li>问题非常真实，贴近 AI4Science 和知识图谱落地。</li><li>human-in-the-loop 设计合理，没有假装全自动万能。</li><li>Agent + FAISS + QUDT 的 grounding 方案工程上很实用。</li><li>ALD/ALE 案例选得好，能体现单位、工艺参数和过程结构的重要性。</li></ul></div><div class="card"><h3>不足</h3><ul><li>评价指标偏弱，ROUGE/BLEU/BERTScore 不太适合衡量 schema 是否科学正确。</li><li>缺少真正的 gold standard schema。</li><li>Agent grounding 没有给出足够细的准确率、召回率、单位准确率。</li><li>跨领域泛化还主要是展望，没有实证。</li></ul></div></div><div class="callout warn" style="margin-top:20px">如果下一版要更强，我最希望看到 schema-aware metrics、grounding ablation、完整 prompt 和专家标注基准。这样它就不只是一个漂亮系统，而会是一篇更硬的实验论文。</div></div></section>
+<section><h2 class="title">One More Thing</h2><p class="lead">论文最后还做了一个 Hugging Face Spaces 聊天应用。我的理解是，它真正指向的是一个“科学 schema IDE”：专家在界面里看字段 diff、看单位候选、看本体 URI、看来源证据，然后一键接受、拒绝或修改。</p><figure><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/schema-minerpro/inline/figure-07.png" alt="Chat app"><figcaption>Figure 7：SCHEMA-MINERpro Chat application。</figcaption></figure></section>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/13/PaperReadings/schema-minerpro/">http://nanamiakari.github.io/2026/05/13/PaperReadings/schema-minerpro/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/">结构化数据</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">数据中台架构与标准字典实验说明</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Docs2Table: 从多文档到结构化表格</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">LLMStructBench: 结构化数据抽取基准</div></div></a></div><div><a href="/2026/05/02/PaperReadings/schematiq/" title="ScheMatiQ: 从研究问题到可验证数据表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">ScheMatiQ: 从研究问题到可验证数据表</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程">SCHEMA-MINERpro: 让机器读懂科学实验流程</a><time datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格">Docs2Table: 从多文档到结构化表格</a><time datetime="2026-05-13T07:48:15.000Z" title="发表于 2026-05-13 15:48:15">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分">CONSTRUCT: 结构化输出的实时可信度评分</a><time datetime="2026-05-07T02:37:02.000Z" title="发表于 2026-05-07 10:37:02">2026-05-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准">LLMStructBench: 结构化数据抽取基准</a><time datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

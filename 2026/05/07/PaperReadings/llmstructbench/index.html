@@ -1,0 +1,1098 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LLMStructBench: 结构化数据抽取基准 | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Benchmarking LLM Structured Data Extraction         把一封邮件，变成一个可信的 JSON。                    这篇论文提出 LLMStructBench：一个用于评估 LLM 从自然语言文本抽取结构化字段、并一次性生成合法 JSON 的 benchmark。最关键的发现是">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLMStructBench: 结构化数据抽取基准">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/07/PaperReadings/llmstructbench/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="Benchmarking LLM Structured Data Extraction         把一封邮件，变成一个可信的 JSON。                    这篇论文提出 LLMStructBench：一个用于评估 LLM 从自然语言文本抽取结构化字段、并一次性生成合法 JSON 的 benchmark。最关键的发现是">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-07T02:35:41.000Z">
+<meta property="article:modified_time" content="2026-05-20T12:42:58.794Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="结构化数据">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/07/PaperReadings/llmstructbench/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LLMStructBench: 结构化数据抽取基准',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-20 20:42:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">LLMStructBench: 结构化数据抽取基准</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-20T12:42:58.794Z" title="更新于 2026-05-20 20:42:58">2026-05-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>21分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="LLMStructBench: 结构化数据抽取基准"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-llmstructbench">
+<header class="hero">
+    <div class="hero-inner">
+      <div>
+        <div class="eyebrow">Benchmarking LLM Structured Data Extraction</div>
+        <h2 class="paper-main-title">把一封邮件，变成一个可信的 JSON。</h2>
+        <p class="subtitle">
+          这篇论文提出 LLMStructBench：一个用于评估 LLM 从自然语言文本抽取结构化字段、并一次性生成合法 JSON 的 benchmark。最关键的发现是：
+          <strong>模型大小不是决定性因素，prompt 与 schema 约束如何配合，往往更重要。</strong>
+        </p>
+        <div class="hero-actions">
+          <a class="pill primary" href="#one-page">开始阅读</a>
+          <a class="pill" href="#reproduce">复现实验设置</a>
+        </div>
+      </div>
+      <div class="device" aria-label="论文主结论可视化">
+        <div class="screen">
+          <div class="tag">995 tests</div>
+          <div class="tag">22 open-weight models</div>
+          <div class="tag">5 prompting strategies</div>
+          <div class="schema-grid">
+            <div class="schema-chip"><b>0.74</b>Gemma3-27B 与 GPT-4o 并列最高 P-score</div>
+            <div class="schema-chip"><b>18</b>PJ+ 全模型聚合 parsing failure 数</div>
+            <div class="schema-chip"><b>11/22</b>P strategy 成为最多模型的最佳策略</div>
+            <div class="schema-chip"><b>WV</b>Wrong Value 是最大瓶颈</div>
+          </div>
+<pre class="json-demo">{
+  "task": "email -> schema-valid JSON",
+  "central_tradeoff": "structure validity vs semantic fidelity",
+  "best_default": "P for aligned models, PJ+ for fragile models",
+  "reviewer_note": "需要真实数据与更强统计检验"
+}</pre>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main id="one-page">
+    <section class="plain">
+      <h2>先给结论</h2>
+      <p class="lead">
+        LLMStructBench 的研究对象不是传统 IE 里的“字段识别准确率”那么简单，而是更贴近工程现场的要求：给定一段自然语言、一份 JSON Schema 和一个示例，模型能否在第一次响应中返回一个
+        <span style="white-space:nowrap;">schema-valid</span>、字段值也正确的 JSON object。论文的核心洞见是，<span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 这类字段级指标与 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 这类文档级完全正确指标会出现明显分裂：prompt 约束越强，JSON 越容易 parse，但语义值不一定更准。
+      </p>
+      <div class="answer-strip">
+        <div class="answer">
+          <span class="tiny-label">一句话</span>
+          <strong>这篇论文在测“LLM 能不能靠谱填表”。</strong>
+          <p class="muted">输入是一封邮件，输出必须是符合 schema 的 JSON，而且字段值要真的从邮件里抽对。</p>
+        </div>
+        <div class="answer">
+          <span class="tiny-label">最反直觉</span>
+          <strong>更强的 JSON 约束不一定让答案更正确。</strong>
+          <p class="muted">PJ+ 几乎不再失败解析，但很多错误会变成 Wrong Value，也就是字段在、格式对、值错了。</p>
+        </div>
+        <div class="answer">
+          <span class="tiny-label">怎么用</span>
+          <strong>先按模型族选 prompt，再做语义校验。</strong>
+          <p class="muted">P 往往综合最好；PJ+ 更适合先保住结构。真正上线还需要 validation 或人工兜底。</p>
+        </div>
+      </div>
+      <div class="plain-box">
+        <h3>如果你只想快速读懂，按这个顺序看</h3>
+        <div class="read-path">
+          <a href="#problem"><b>1. 任务是什么</b>先理解“邮件 + schema → JSON”的评估设置。</a>
+          <a href="#math"><b>2. 指标怎么看</b>记住两个分数：字段级对不对，整份 JSON 是否一次全对。</a>
+          <a href="#results"><b>3. 结果怎么读</b>重点看 P vs PJ+，以及 WV 为什么压不下去。</a>
+          <a href="#review"><b>4. 这工作靠谱吗</b>最后看我对数据、复现性和改进方向的评价。</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="background">
+      <h2>背景：为什么结构化输出这件事还没解决</h2>
+      <div class="plain-box">
+        <h3>先把场景想简单一点</h3>
+        <p>
+          你可以把这篇论文想成一个“自动填表”测试：员工发来一封邮件，系统需要把姓名、日期、设备、数量、严重程度等信息填进固定表格。问题是，LLM 很会写解释，但业务系统只认严格 JSON。括号少一个、日期格式错一个、字段值编错一个，自动化流程都可能坏。
+        </p>
+      </div>
+      <div class="grid-2">
+        <div>
+          <p>
+            在 HR、财务、IT support、物流、电商等流程中，大量业务数据先以邮件、工单、申请说明等自由文本出现。自动化系统真正想要的不是一段回答，而是一个能被程序消费的对象，例如：
+          </p>
+<pre class="code">{
+  "EmployeeName": "Aiko Tanaka",
+  "EmployeeID": "XY729B",
+  "IssueSeverity": "High",
+  "ReportDate": "05.10.2023"
+}</pre>
+          <p>
+            对下游 ETL 或 workflow engine 而言，“大概对”通常不够。少一个 key、日期格式错、返回 markdown code fence、把数值写成解释性文本，都可能让 pipeline 在第一步失败。
+          </p>
+        </div>
+        <div class="card">
+          <h3>本文发现的现实缺口</h3>
+          <ul>
+            <li>已有研究常看 schema compliance 或抽取准确率，但二者很少被同一套任务系统性拆开评估。</li>
+            <li>LLM 的 JSON 输出质量不是单调随参数规模变好；同一模型族对不同 prompt 约束的反应差异很大。</li>
+            <li>结构正确性提升可能把错误从 Missing Key 转移到 Wrong Value，而不是消灭错误。</li>
+            <li>隐私场景中，很多团队不能把业务邮件送到闭源 API，因此 open-weight model 的本地部署表现很关键。</li>
+          </ul>
+        </div>
+      </div>
+      <div class="plain-box">
+        <h3>术语小词典</h3>
+        <div class="glossary">
+          <div class="term"><b>JSON Schema</b>规定 JSON 里有哪些字段、字段是什么类型、能不能嵌套、日期要长什么样。</div>
+          <div class="term"><b>Ground Truth (GT)</b>人工确认过的标准答案 JSON，用来和模型输出逐字段比较。</div>
+          <div class="term"><b>Parseable JSON</b>模型输出至少能被程序读成 JSON；但能 parse 不代表值一定对。</div>
+          <div class="term"><b>Schema-valid JSON</b>不仅能 parse，而且字段结构和类型满足 schema。</div>
+          <div class="term"><b>Wrong Value (WV)</b>字段存在、结构也可能对，但值错了。这是本文发现的最大瓶颈。</div>
+          <div class="term"><b>Document-level correct</b>整份 JSON 完全正确。现实中很多 pipeline 要的就是这个。</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <h2>要解决什么问题</h2>
+      <p class="lead">
+        论文要回答一个工程味很浓的问题：当我们要求 LLM 从自然语言消息中抽取所有必要字段，并输出符合指定 JSON Schema 的单个对象时，什么模型、什么 prompt 策略最可靠？
+      </p>
+      <div class="flow">
+        <div class="step"><div class="num">01</div><strong>输入文本</strong><p class="muted">邮件、申请、提醒、工单等自然语言文本。</p></div>
+        <div class="step"><div class="num">02</div><strong>Schema</strong><p class="muted">固定 key、类型、嵌套深度、日期 pattern。</p></div>
+        <div class="step"><div class="num">03</div><strong>示例对</strong><p class="muted">一个 example text + reference JSON。</p></div>
+        <div class="step"><div class="num">04</div><strong>LLM 输出</strong><p class="muted">要求只返回单个 JSON object。</p></div>
+        <div class="step"><div class="num">05</div><strong>评估</strong><p class="muted">同时比较 parseability、schema validity、字段值语义正确性。</p></div>
+      </div>
+      <figure class="paper-figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-01.png" alt="Figure 1: LLMStructBench inference-time setup" />
+        <figcaption><strong>Figure 1.</strong> LLMStructBench inference-time setup?dataset use-case?natural language text?example pair?JSON schema ???? LLM????????? JSON ?? Ground Truth ?????</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>目前的方法版图</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Schema-constrained decoding</h3>
+          <p>代表工作 JSONSchemaBench 关注 constrained decoding engine 能否覆盖 JSON Schema 特性、提升生成效率和合规性。优势是结构强；不足是更偏 decoder/framework 层，不直接衡量端到端 IE 里的语义字段是否正确。</p>
+        </div>
+        <div class="card">
+          <h3>Prompting workflow</h3>
+          <p>Generate & Organize 这类两阶段方法先抽内容，再组织成结构，动机是拆开“理解文本”和“格式化输出”。本文实验支持这个思路：结构约束与语义正确性确实会互相拉扯。</p>
+        </div>
+        <div class="card">
+          <h3>Schema-driven prompting</h3>
+          <p>在 prompt 中显式提供 schema 或 example object，让模型模仿目标结构。本文把这种策略和 Ollama API 的 <code>format</code> 参数组合起来，形成五种可比较条件。</p>
+        </div>
+      </div>
+      <p>
+        LLMStructBench 的定位是补上一个中间层：不只问“能不能生成合法 JSON”，也不只问“字段值像不像”，而是用同一组邮件式任务观察模型族、规模、prompt 约束之间的 error redistribution。
+      </p>
+    </section>
+
+    <section id="method">
+      <h2>本文方法：数据集、任务与创新点</h2>
+      <div class="grid-2">
+        <div>
+          <h3>Dataset 设计</h3>
+          <p>
+            数据集包含 5 个 use-case，每个 use-case 有 199 个手工验证样本，共 995 tests。每个 scenario 固定一份 JSON Schema，样本由自然语言消息和 schema-conform ground truth object 组成。论文强调数据虽由 GPT-4o 合成，但经过人工检查，删除或修复 text 与 JSON 不一致的样本。
+          </p>
+          <p>
+            合成流程是先生成 fully populated JSON object，再用 email generation prompt 转成自然语言邮件。为了制造 lexical diversity，prompt 要求随机化人名、日期、数值和场景字段。
+          </p>
+        </div>
+        <div class="card">
+          <h3>创新点</h3>
+          <ul>
+            <li>开放 benchmark：995 个手工验证样本，任务明确面向 JSON structured extraction。</li>
+            <li>指标设计：同时给出 character/token-ish field 级 accuracy 和 document-level validity。</li>
+            <li>prompt 策略实验：系统比较 5 种 JSON prompting configuration。</li>
+            <li>模型覆盖：22 个 open-weight variants + GPT-4o reference，覆盖 0.6B 到 70B。</li>
+            <li>错误画像：把 MK、MV、WV 的 overlap 拆开看，指出 WV 是长期瓶颈。</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>Table I：五类任务复杂度</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Use case</th><th>描述</th><th>Count</th><th>Keys</th><th>Leaves</th><th>Depth</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Support tickets</td><td>IT support ticket requests</td><td>199</td><td>5</td><td>5</td><td>2</td></tr>
+            <tr><td>Sick leave</td><td>Sick-leave requests</td><td>199</td><td>7</td><td>5</td><td>3</td></tr>
+            <tr><td>Project extension</td><td>Project extension requests</td><td>199</td><td>9</td><td>6</td><td>3</td></tr>
+            <tr><td>Conference registration</td><td>Conference registration requests</td><td>199</td><td>9</td><td>7</td><td>3</td></tr>
+            <tr><td>Loan request</td><td>Equipment loan requests，含 object array</td><td>199</td><td>10.04*</td><td>9.04*</td><td>4</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">* Loan request 的 key/leaves 是平均值，因为结构包含对象数组。</p>
+
+      <h3>Appendix B 的两个示例</h3>
+      <div class="grid-2">
+        <div class="card">
+          <h4>Easy: Support Ticket</h4>
+          <p>文本包含员工姓名、ID、问题描述、严重程度、报告日期。目标是扁平 key-value JSON。</p>
+<pre class="code">{
+  "EmployeeName": "Aiko Tanaka",
+  "EmployeeID": "XY729B",
+  "IssueDescription": "Unable to access shared drives due to permission error.",
+  "IssueSeverity": "High",
+  "ReportDate": "05.10.2023"
+}</pre>
+        </div>
+        <div class="card">
+          <h4>Harder: Loan Request</h4>
+          <p>文本中列出多件设备和数量，目标 JSON 含 <code>Equipment</code> 数组，每个 item 有类型和数量。</p>
+<pre class="code">{
+  "BorrowerName": "Hiroshi Yamamoto",
+  "BorrowerID": null,
+  "Equipment": [
+    {"EquipmentType": "tablet", "EquipmentQuantity": 1},
+    {"EquipmentType": "VR headset", "EquipmentQuantity": 2},
+    {"EquipmentType": "digital camera", "EquipmentQuantity": 1}
+  ],
+  "ReturnDate": "23.11.2023"
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <section id="math">
+      <h2>数学表示与建模</h2>
+      <div class="plain-box">
+        <h3>先别急着看公式：作者其实在问两件事</h3>
+        <p>
+          第一，模型抽出来的每个字段值有多接近标准答案？这对应 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span>。第二，整份 JSON 有没有一次性完全正确？这对应 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span>。前者像“考试按小题给分”，后者像“表单只要一格错就退回”。
+        </p>
+      </div>
+      <p class="lead">
+        论文把输出错误递归拆成 Missing Key (MK)、Missing Value (MV)、Wrong Value (WV)。WV 又分为 string deviation、same-type value error、coercible mismatch、hard type error。最终指标不是单一 accuracy，而是字段级 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 与文档级 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 的组合。
+      </p>
+      <div class="glossary">
+        <div class="term"><b>MK: Missing Key</b>标准答案有这个字段，模型输出里没有。例如少了 <code>ReturnDate</code>。</div>
+        <div class="term"><b>MV: Missing Value</b>字段在，但值缺失或是 <code>null</code>。例如 <code>"EmployeeID": null</code>。</div>
+        <div class="term"><b>WV: Wrong Value</b>字段和值都看起来存在，但值与 GT 不一致。例如数量 2 写成 1。</div>
+        <div class="term"><b>Failed</b>输出完全无法作为 JSON 使用，或有致命 schema violation。</div>
+      </div>
+      <h3>字段级 score</h3>
+      <div class="formula">
+        \[
+        F1_{\mathrm{micro}}=\lambda F1_{\mathrm{keys}}+(1-\lambda)F1_{\mathrm{values}},\qquad \lambda=0.25
+        \]
+        \[
+        F1_{\mathrm{keys}}=\frac{2P_{\mathrm{keys}}R_{\mathrm{keys}}}{P_{\mathrm{keys}}+R_{\mathrm{keys}}},\qquad
+        F1_{\mathrm{values}}=\frac{2P_{\mathrm{values}}R_{\mathrm{values}}}{P_{\mathrm{values}}+R_{\mathrm{values}}}
+        \]
+      </div>
+      <p>
+        这里 key 只占 25%，原因是作者认为 value 错误对下游系统更危险。一个 missing key 也会在 value 层再被罚一次，所以降低 key 权重避免重复惩罚过重。
+      </p>
+      <div class="reading-tip">
+        读法：<span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 高，说明模型大体能把字段抽对；但它允许“部分正确”。所以它适合比较抽取能力，不适合作为上线前唯一指标。
+      </div>
+      <h3>值级 fuzzy credit</h3>
+      <div class="formula">
+        \[
+        TP_{v}=N_{v}-\left(E_{\mathrm{type}}+E_{\mathrm{value}}+E_{\mathrm{coerce}}+E_{\mathrm{dev}}\right)
+        +\sum_{i=1}^{N_{\mathrm{lev}}}D(d_i)+\gamma E_{\mathrm{coerce}},\qquad \gamma=0.2
+        \]
+        \[
+        D(d)=
+        \begin{cases}
+        1, & d \le \tau_{\mathrm{good}}\\
+        \alpha(1-d), & \tau_{\mathrm{good}} < d < \tau_{\mathrm{bad}}\\
+        \rho_{\mathrm{bad}}, & d \ge \tau_{\mathrm{bad}}
+        \end{cases}
+        \]
+      </div>
+      <p>
+        论文给出的参数是 <span style="white-space:nowrap;">\(\alpha=0.5\)</span>、<span style="white-space:nowrap;">\(\tau_{\mathrm{good}}=0.1\)</span>、<span style="white-space:nowrap;">\(\tau_{\mathrm{bad}}=2.0\)</span>，并对严重错误字符串施加负惩罚 <span style="white-space:nowrap;">\(\rho_{\mathrm{bad}}=-1\)</span>。这一设计让“42” vs 42 或轻微拼写差异获得部分 credit，但硬类型错误和荒谬字符串不会被温柔放过。
+      </p>
+      <h3>文档级 correctness</h3>
+      <div class="formula">
+        \[
+        DOC_{\mathrm{micro}}=\frac{\#\mathrm{Correct}}{\#\mathrm{Tests}}
+        \left(1-\frac{\#\mathrm{Failed}}{\#\mathrm{Tests}}\right)
+        \]
+        \[
+        Score=(1-\eta)F1_{\mathrm{micro}}+\eta DOC_{\mathrm{micro}},\qquad \eta=0.5
+        \]
+      </div>
+      <p>
+        这一步非常关键：一个模型可以字段级分数很高，但每个文档都错一个小字段，对严格 ETL 来说仍然不可用。<span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 逼迫模型在 document-level 上达到“整份 JSON 完全正确”。
+      </p>
+      <div class="plain-box">
+        <h3>一个小例子</h3>
+        <p>
+          假设一份 JSON 有 10 个字段，模型每次都抽对 9 个、错 1 个。字段级分数看起来很高，但如果业务系统要求整份表单完全正确，那么 100 份输出里可能 0 份能直接进入数据库。这就是论文为什么要同时看 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 和 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span>。
+        </p>
+      </div>
+    </section>
+
+    <section id="experiments">
+      <h2>实验方法与可复现设计</h2>
+      <div class="plain-box">
+        <h3>实验其实是在比较两种“管住模型”的方式</h3>
+        <p>
+          第一种是在 prompt 里反复告诉模型“按这个 schema 输出 JSON”，这就是 P。第二种是用 API 的 <code>format</code> 参数硬性要求 JSON 或 JSON Schema，这就是 J/J+。PJ+ 则是两者都用：prompt 里说清楚，API 层也约束。
+        </p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>模型池</h3>
+          <p>Open-weight 模型共 22 个 variants，来自 Qwen3、Phi、Gemma3、Deepseek-R1、Llama3。规模覆盖 0.6B 到 70B。</p>
+          <p>额外加入 GPT-4o 作为 closed-weight upper-bound reference，但不纳入参数规模相关分析。</p>
+        </div>
+        <div class="card">
+          <h3>运行接口</h3>
+          <p>论文使用 Ollama API 风格的 <code>format</code> 参数做 JSON 约束实验：有时传 literal string <code>"json"</code>，有时传完整 JSON Schema object，也有完全不设 API format 的条件。</p>
+          <p class="muted">论文没有充分报告 temperature、top-p、seed、max tokens、硬件和具体 Ollama/version，这是复现层面的明显缺口。</p>
+        </div>
+      </div>
+
+      <h3>Table II：五种 prompting strategy</h3>
+      <div class="reading-tip">
+        读表口诀：<strong>P 看 prompt，J 看 API format，+ 看是否把完整 JSON Schema 交给 API。</strong> 所以 PJ+ 是“prompt 说清楚 + API 也用 schema 管住”。
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tag</th><th>描述</th><th><code>format</code> 参数</th><th>System/User prompt 中是否含 schema/example</th></tr></thead>
+          <tbody>
+            <tr><td>J</td><td>只设置 API <code>format</code> 为 JSON</td><td><code>"json"</code></td><td>不显式提结构</td></tr>
+            <tr><td>P</td><td>prompt 要求返回 JSON，并给 schema 与 example object</td><td>不设置</td><td>包含 JSON schema 和 example object</td></tr>
+            <tr><td>PJ</td><td>API 设置 <code>"json"</code>，prompt 也要求 JSON</td><td><code>"json"</code></td><td>包含 JSON schema 和 example object</td></tr>
+            <tr><td>J+</td><td>把 JSON Schema object 放进 API <code>format</code></td><td>JSON-Schema object</td><td>不显式提结构</td></tr>
+            <tr><td>PJ+</td><td>API <code>format</code> 使用 JSON Schema，同时 prompt 给 schema/example</td><td>JSON-Schema object</td><td>包含 JSON schema 和 example JSON object</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Prompt 策略选择的早期 scoring</h3>
+      <p>
+        作者先不急着比较所有模型的最终综合分，而是粗略数一数：哪个策略更常产出完美 JSON，哪个策略更容易失败。这个 early scoring 的作用是筛出 P 和 PJ+ 两个主角。
+      </p>
+      <p>作者先用一个粗粒度策略分数挑出最值得深挖的 prompting technique。每个 test-case 或 error occurrence 的权重如下：</p>
+      <div class="grid-2">
+        <div class="card">
+          <ul>
+            <li>Correct：每个 flawless generation 加 10 分。</li>
+            <li>Mistakes：value deviation 或 extra keys 每次扣 1 分。</li>
+            <li>Errors：missing values 或 missing keys 每次扣 2 分。</li>
+            <li>Failures：无法返回可解析 JSON 每个 test-case 扣 15 分。</li>
+          </ul>
+        </div>
+        <div>
+          <figure class="paper-figure">
+            <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-02.png" alt="Figure 2: Phi3-3.8B parsing success across prompting strategies" />
+            <figcaption><strong>Figure 2.</strong> Phi3-3.8B ??? prompting strategy ?? parsing success / extracted / failure ???</figcaption>
+          </figure>
+          <figure class="paper-figure">
+            <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-03.png" alt="Figure 3: Phi3-3.8B JSON error distribution" />
+            <figcaption><strong>Figure 3.</strong> Phi3-3.8B ? correct?mistake?error?failure ???? Phi ? P/PJ+ ????????</figcaption>
+          </figure>
+        </div>
+      </div>
+
+      <h3>实验数据结构化清单</h3>
+      <div class="table-wrap" id="reproduce">
+        <table>
+          <thead><tr><th>复现项</th><th>论文提供的信息</th><th>复现时需要补足/固定</th></tr></thead>
+          <tbody>
+            <tr><td>数据</td><td>5 scenarios × 199 = 995 validated tests；每个 scenario 固定 schema。</td><td>公开仓库路径、样本划分、schema 文件版本。</td></tr>
+            <tr><td>输入</td><td>natural-language message + schema + example pair。</td><td>exact system prompt/user prompt/template 拼接顺序。</td></tr>
+            <tr><td>模型</td><td>Qwen3、Phi、Gemma3、Deepseek-R1、Llama3 共 22 个 open variants；GPT-4o reference。</td><td>模型 checkpoint hash、quantization、Ollama tag。</td></tr>
+            <tr><td>生成参数</td><td>围绕 Ollama <code>format</code> 参数做五种条件。</td><td>temperature、top_p、top_k、max_tokens、seed、stop tokens。</td></tr>
+            <tr><td>解析</td><td>若模型输出 JSON 外包裹文本，尝试 regex 抽取 JSON substring。</td><td>regex 具体实现，多个 JSON block 时的选择规则。</td></tr>
+            <tr><td>评估</td><td>递归比较 GT 与输出，统计 MK/MV/WV，计算 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span>、<span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span>、Score。</td><td>字符串 normalization、日期/大小写/空白处理规则。</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="results">
+      <h2>实验结果与核心结论</h2>
+      <div class="plain-box">
+        <h3>先抓住一条主线</h3>
+        <p>
+          这部分所有表和图都在证明同一件事：<strong>结构正确</strong>和<strong>语义正确</strong>不是一回事。强约束可以让模型更像 JSON，但不一定让字段值更可信。读结果时不要只看 Correct，也要看 Failed 和 WV。
+        </p>
+      </div>
+      <h3>1. Prompt strategy 比想象中更重要</h3>
+      <div class="reading-tip">
+        这张表的读法：Correct 越高越好，Failed 越低越好；Mistakes/Errors 是还需要后处理或人工修的输出。P 的 Correct 最高，但 Failed 也最高；PJ+ 的 Failed 几乎归零，但 Mistakes 更多。
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Strategy</th><th>Correct</th><th>Mistakes</th><th>Errors</th><th>Failed</th><th>解读</th></tr></thead>
+          <tbody>
+            <tr><td>J</td><td>2,271</td><td>45,951</td><td>28,797</td><td>726</td><td>只靠 API JSON mode 不够，语义错误和结构错误都多。</td></tr>
+            <tr><td>P</td><td>7,791</td><td>14,171</td><td>2,879</td><td>1,597</td><td>正确数最高、mistakes 最少，但对 Phi 等模型可能 catastrophic failure。</td></tr>
+            <tr><td>PJ</td><td>6,800</td><td>15,792</td><td>13,506</td><td>445</td><td>比 J 好，但 errors 高。</td></tr>
+            <tr><td>J+</td><td>6,129</td><td>28,903</td><td>1,242</td><td>135</td><td>schema-level format 降低 structural errors，但 semantic mistakes 多。</td></tr>
+            <tr><td>PJ+</td><td>7,646</td><td>20,652</td><td>1,169</td><td>18</td><td>最稳 parse，几乎消灭 failure；代价是 Wrong Value 更多。</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="bars" aria-label="prompt rank">
+        <div class="bar-row"><b>P</b><div class="bar"><i style="width:100%"></i></div><span>11 wins</span></div>
+        <div class="bar-row"><b>PJ+</b><div class="bar"><i style="width:72.7%"></i></div><span>8 wins</span></div>
+        <div class="bar-row"><b>PJ</b><div class="bar"><i style="width:27.3%"></i></div><span>3 wins</span></div>
+        <div class="bar-row"><b>J/J+</b><div class="bar"><i style="width:0%"></i></div><span>0 wins</span></div>
+      </div>
+      <p>
+        Table IV 显示 P 在 11 个模型上是最优，PJ+ 在 8 个模型上最优。作者后续集中比较 P 和 PJ+。
+      </p>
+      <div class="paper-figure-grid">
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-04.png" alt="Figure 6: Deepseek-R1 F1micro and DOCmicro distribution under P prompting" />
+          <figcaption><strong>Figure 6.</strong> Deepseek-R1 在 P strategy 下的 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 与 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 分布。</figcaption>
+        </figure>
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-05.png" alt="Figure 5: Gemma3 F1micro and DOCmicro by model size" />
+          <figcaption><strong>Figure 5.</strong> Gemma3 ? <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> ? <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span>?1B ? document-level ???????</figcaption>
+        </figure>
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-06.png" alt="Figure 7: Deepseek-R1 F1micro and DOCmicro distribution under PJ+ prompting" />
+          <figcaption><strong>Figure 7.</strong> 切换到 PJ+ 后，Deepseek-R1 的 document-level 方差显著收窄，但 semantic WV 更集中。</figcaption>
+        </figure>
+      </div>
+
+      <h3>2. 模型规模有帮助，但不是单调决定因素</h3>
+      <div class="reading-tip">
+        排行榜不要只看第一列模型名。重点看两个分数的差距：很多模型 <span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> 很高，但 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 低得多，说明“字段常常接近正确，但整份 JSON 经常不能一次全对”。
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Model</th><th>Size</th><th><span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span></th><th><span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span></th><th>Score</th></tr></thead>
+          <tbody>
+            <tr><td>GPT-4o</td><td>approx. 1.8T*</td><td>0.96</td><td>0.52</td><td>0.74</td></tr>
+            <tr><td>Gemma3</td><td>27B</td><td>0.96</td><td>0.52</td><td>0.74</td></tr>
+            <tr><td>Llama3.1</td><td>70B</td><td>0.95</td><td>0.51</td><td>0.73</td></tr>
+            <tr><td>Gemma3</td><td>12B</td><td>0.95</td><td>0.49</td><td>0.72</td></tr>
+            <tr><td>Deepseek-R1</td><td>70B</td><td>0.95</td><td>0.45</td><td>0.70</td></tr>
+            <tr><td>Llama3.3</td><td>70B</td><td>0.95</td><td>0.45</td><td>0.70</td></tr>
+            <tr><td>Qwen3</td><td>14B</td><td>0.95</td><td>0.44</td><td>0.69</td></tr>
+            <tr><td>Deepseek-R1</td><td>14B</td><td>0.95</td><td>0.43</td><td>0.69</td></tr>
+            <tr><td>Qwen3</td><td>1.7B</td><td>0.94</td><td>0.40</td><td>0.67</td></tr>
+            <tr><td>Deepseek-R1</td><td>7B</td><td>0.94</td><td>0.39</td><td>0.67</td></tr>
+            <tr><td>Qwen3</td><td>32B</td><td>0.94</td><td>0.39</td><td>0.67</td></tr>
+            <tr><td>Deepseek-R1</td><td>8B</td><td>0.94</td><td>0.38</td><td>0.66</td></tr>
+            <tr><td>Phi3</td><td>14B</td><td>0.94</td><td>0.38</td><td>0.66</td></tr>
+            <tr><td>Phi4-mini</td><td>3.8B</td><td>0.95</td><td>0.38</td><td>0.66</td></tr>
+            <tr><td>Phi4</td><td>14B</td><td>0.94</td><td>0.38</td><td>0.66</td></tr>
+            <tr><td>Qwen3</td><td>4B</td><td>0.93</td><td>0.37</td><td>0.65</td></tr>
+            <tr><td>Qwen3</td><td>8B</td><td>0.93</td><td>0.36</td><td>0.65</td></tr>
+            <tr><td>Deepseek-R1</td><td>32B</td><td>0.94</td><td>0.33</td><td>0.63</td></tr>
+            <tr><td>Qwen3</td><td>0.6B</td><td>0.92</td><td>0.30</td><td>0.61</td></tr>
+            <tr><td>Deepseek-R1</td><td>1.5B</td><td>0.90</td><td>0.16</td><td>0.53</td></tr>
+            <tr><td>Gemma3</td><td>1B</td><td>0.89</td><td>0.10</td><td>0.49</td></tr>
+            <tr><td>Phi3.5</td><td>3.8B</td><td>0.95</td><td>0.03</td><td>0.49</td></tr>
+            <tr><td>Phi3</td><td>3.8B</td><td>0.95</td><td>0.01</td><td>0.48</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="muted">* GPT-4o 参数量是论文中的近似值，作者也注明没有有效公开信息。</p>
+      <div class="callout">
+        <h3>最重要的结果读法</h3>
+        <p>Gemma3-27B 与 GPT-4o 并列最高，Gemma3-12B 甚至超过多款 70B 模型。Qwen3-1.7B 进入中游，Deepseek-R1-32B 反而落后于更小模型。这说明 structured extraction 的可靠性更像是 instruction tuning、数据质量、架构和 prompt compatibility 的共同产物，而不是单纯参数规模的函数。</p>
+      </div>
+
+      <h3>3. 错误从“结构失败”转向“语义值错误”</h3>
+      <div class="reading-tip">
+        这里是全文最关键 insight：PJ+ 把 MK/MV 压得很低，但 WV 接近 100%。也就是说模型越来越会“填满表格”，但还是会把表格内容填错。
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th rowspan="2">Deepseek-R1</th><th colspan="4">P</th><th colspan="4">PJ+</th></tr><tr><th>\(N_{\mathrm{err}}\)</th><th>MK%</th><th>MV%</th><th>WV%</th><th>\(N_{\mathrm{err}}\)</th><th>MK%</th><th>MV%</th><th>WV%</th></tr></thead>
+          <tbody>
+            <tr><td>1.5B</td><td>790</td><td>36.8</td><td>18.9</td><td>76.7</td><td>605</td><td>0.0</td><td>0.3</td><td>99.7</td></tr>
+            <tr><td>7B</td><td>601</td><td>1.2</td><td>16.0</td><td>91.5</td><td>616</td><td>0.0</td><td>1.6</td><td>100.0</td></tr>
+            <tr><td>8B</td><td>611</td><td>0.0</td><td>5.7</td><td>97.2</td><td>658</td><td>0.0</td><td>0.0</td><td>100.0</td></tr>
+            <tr><td>14B</td><td>561</td><td>0.2</td><td>7.7</td><td>96.4</td><td>631</td><td>0.0</td><td>0.5</td><td>100.0</td></tr>
+            <tr><td>32B</td><td>666</td><td>0.3</td><td>4.8</td><td>98.3</td><td>733</td><td>0.0</td><td>0.0</td><td>100.0</td></tr>
+            <tr><td>70B</td><td>538</td><td>0.2</td><td>6.7</td><td>97.8</td><td>578</td><td>0.0</td><td>0.0</td><td>100.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Table VI 是全文最有洞见的表之一。PJ+ 几乎消灭 MK/MV，特别是小模型 1.5B 的 MK 从 36.8% 降到 0%。但剩余错误几乎全变成 WV。换句话说，强 schema 约束保证“盒子形状对了”，却没有保证“盒子里放的东西对了”。
+      </p>
+
+      <h3>4. 顶尖模型也绕不开 WV</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th rowspan="2">Top model</th><th colspan="4">P</th><th colspan="4">PJ+</th></tr><tr><th>\(N_{\mathrm{err}}\)</th><th>MK%</th><th>MV%</th><th>WV%</th><th>\(N_{\mathrm{err}}\)</th><th>MK%</th><th>MV%</th><th>WV%</th></tr></thead>
+          <tbody>
+            <tr><td>GPT-4o</td><td>473</td><td>0.0</td><td>9.3</td><td>96.4</td><td>555</td><td>0.0</td><td>5.0</td><td>98.0</td></tr>
+            <tr><td>Gemma3-27B</td><td>478</td><td>0.0</td><td>6.7</td><td>97.3</td><td>559</td><td>0.0</td><td>0.0</td><td>100.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>
+        Table VII 说明，即使是 GPT-4o 和 Gemma3-27B，错误池中也几乎被 WV 主导。PJ+ 对 Gemma3-27B 可以把 MV 降到 0，但 WV 占比变成 100%。这再次证明：schema enforcement 解决的是“形状”，不是“事实”。
+      </p>
+      <div class="paper-figure-grid">
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-07.png" alt="Figure 10: Venn diagrams for Deepseek-R1 errors under P prompting" />
+          <figcaption><strong>Figure 10.</strong> Deepseek-R1 在 P strategy 下 MK、MV、WV 的 Venn overlap。随着规模增加，MK 几乎消失，但 WV 持续存在。</figcaption>
+        </figure>
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-08.png" alt="Figure 11: Venn diagrams for Deepseek-R1 errors under PJ+ prompting" />
+          <figcaption><strong>Figure 11.</strong> Deepseek-R1 在 PJ+ strategy 下的错误 overlap。结构类错误被压缩后，剩余错误几乎都表现为 WV。</figcaption>
+        </figure>
+      </div>
+
+      <h3>5. Table VIII 的模型族级总结</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模型族</th><th>最佳/推荐策略</th><th>主要模式</th><th>论文观察</th></tr></thead>
+          <tbody>
+            <tr><td>Gemma3</td><td>1B 更偏 PJ+；12B/27B 用 P</td><td>1B 有 MK/MV，12B 后以 WV 为主</td><td>12B 是巨大跃升，27B 只有边际提升；27B 与 GPT-4o 并列最高。</td></tr>
+            <tr><td>Llama3 70B</td><td>P</td><td>WV</td><td>整体准确率高，但 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 仍有波动。</td></tr>
+            <tr><td>Qwen3</td><td>0.6B 可用 PJ+，多数规模用 P</td><td>小模型有 MK/WV，中大模型 WV</td><td>1.7B 中游表现亮眼；32B 不一定优于小模型。</td></tr>
+            <tr><td>Deepseek-R1</td><td>1.5B 用 PJ+；7B-70B 多数用 P</td><td>规模上来后 MK 消失，WV 持续</td><td>32B 是反常低点；PJ+ 让结构稳定但 WV 更集中。</td></tr>
+            <tr><td>Phi</td><td>3.8B 系列更适合 PJ+；14B/Phi4-mini 可用 P</td><td>WV，且小 Phi 的 P failure 明显</td><td>Phi3/Phi3.5 3.8B 的 <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 极低，Phi4-mini 是正向异常点。</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-09.png" alt="Figure 4: Gemma3 raw performance by size under P prompting" />
+          <figcaption><strong>Figure 4.</strong> Gemma3 ? P strategy ????????? correct / mistake / error / failed ???</figcaption>
+        </figure>
+        
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-10.png" alt="Figure 8: F1micro and DOCmicro vs log parameter size under P prompting" />
+          <figcaption><strong>Figure 8.</strong> P strategy ??<span style="white-space:nowrap;">\(F1_{\mathrm{micro}}\)</span> ??????????? <span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> ?????</figcaption>
+        </figure>
+        <figure class="paper-figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/llmstructbench/inline/figure-11.png" alt="Figure 9: F1micro and DOCmicro vs log parameter size under PJ+ prompting" />
+          <figcaption><strong>Figure 9.</strong> PJ+ strategy ??document-level reliability ???? prompt-model interaction ?????</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>核心结论压缩版</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>实践建议</h3>
+          <ul>
+            <li>如果模型族与 prompt 对齐良好，P 策略通常是最高综合分选择。</li>
+            <li>如果模型容易输出不可解析内容，PJ+ 是更安全的起点，因为 failure 极少。</li>
+            <li>对业务 pipeline，不能只看 JSON parse rate；必须单独评估 Wrong Value。</li>
+            <li>小模型不一定不可用，Qwen3-1.7B、Gemma3-12B 展示了强性价比。</li>
+            <li>扩大模型规模对 value accuracy 有帮助，但对 document-level 完全正确率没有稳定保证。</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>论文自己的结论</h3>
+          <ul>
+            <li>GPT-4o 没有明显压过最好的开源模型，Gemma3-27B 达到同等 score。</li>
+            <li>PJ+ 提升结构有效性，但会增加 semantic errors。</li>
+            <li>WV 是几乎所有配置下的主导错误。</li>
+            <li>最佳方案是按模型族匹配 prompting strategy，而不是盲目选大模型。</li>
+            <li>未来需要 post-generation semantic validation 或 fine-tuning，而不只是更强 schema。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="review" class="review">
+      <h2>我的 reviewer 评价</h2>
+      <div class="plain-box">
+        <h3>我对这篇论文的总判断</h3>
+        <p>
+          这是一篇很有工程价值的 benchmark paper：它不一定把 structured extraction 研究推进到理论新高度，但把很多团队在线上踩过的坑量化出来了。它最适合作为“选模型和 prompt 策略前的基准读物”，不适合作为“证明某模型可直接上线”的最终证据。
+        </p>
+      </div>
+      <div class="grid-2">
+        <div>
+          <h3>优点：这篇工作抓住了真问题</h3>
+          <p>
+            我喜欢这篇论文的地方在于，它没有沉迷“模型能不能输出漂亮 JSON”这种表层问题，而是把 production extraction 的两个硬指标拆开：字段值对不对，以及整份文档能不能一次过。<span style="white-space:nowrap;">\(DOC_{\mathrm{micro}}\)</span> 的引入很实用，因为它代表了自动化系统最残酷的验收标准。
+          </p>
+          <p>
+            另一个强点是错误分析。Table VI/VII 很清楚地说明 schema 约束不是免费午餐：它会把 structural error 压下去，但把不确定性挤到 Wrong Value。这个 insight 对做 LLM ETL 的人很有价值，因为它直接决定后续要投 validation、human-in-loop、retrieval grounding 还是 fine-tuning。
+          </p>
+        </div>
+        <div>
+          <h3>不足：benchmark 有用，但还不够硬</h3>
+          <p>
+            最大问题是数据生成。虽然作者做了人工验证，但主体数据仍由 GPT-4o 合成，且 use-case 主要是模板化邮件场景。这会低估真实业务文本中的歧义、缺省信息、噪声、附件引用、多轮上下文和 schema/text 不一致问题。它更像“clean room extraction benchmark”，还不是完整的 real-world ETL benchmark。
+          </p>
+          <p>
+            第二个问题是复现细节不够。模型 tag、quantization、decoding hyperparameters、prompt exact text、regex extraction rule、normalization policy 都会显著影响 JSON 任务结果。论文想服务 practitioner，但 appendix 没把这些钉牢，导致可复现性打折。
+          </p>
+        </div>
+      </div>
+      <div class="callout">
+        <h3>我会怎么改进</h3>
+        <p>
+          下一版应该加入真实邮件/工单脱敏子集，报告严格 seed 与 decoding 参数，并做统计显著性检验。更重要的是，我会增加三类 baseline：constrained decoding engine、function/tool calling style output、以及 post-hoc repair + validation loop。否则“P vs PJ+”的结论容易被更强的 decoding/repair pipeline 改写。
+        </p>
+        <p>
+          指标上也可以更业务化：对字段设置 criticality weight，例如日期、金额、ID 的 WV 远比称呼大小写严重。现在 Levenshtein fuzzy credit 对字符串友好，但对 business semantics 仍偏浅。
+        </p>
+      </div>
+      <div class="plain-box">
+        <h3>落地建议</h3>
+        <ul>
+          <li>先用 P 和 PJ+ 都跑一遍自己的业务样本，不要直接照搬论文的全局最优。</li>
+          <li>把评估拆成三层：能否 parse、是否 schema-valid、字段值是否语义正确。</li>
+          <li>对金额、日期、ID、数量这类 critical field 单独算错误率，不要让平均分掩盖风险。</li>
+          <li>上线前加入 post-hoc validator：日期格式、枚举值、数量范围、ID lookup、跨字段一致性都应该程序化检查。</li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>One More Thing</h2>
+      <p class="lead">
+        这篇论文最值得带走的不是某个 leaderboard 名次，而是一种评估观：结构化输出不是“格式约束问题”，而是“格式、语义、模型习惯、解码策略和下游容错边界”的联合系统问题。
+      </p>
+      <div class="grid-3">
+        <div class="card"><div class="metric">P</div><p>更适合已经听话的模型，综合分常更高。</p></div>
+        <div class="card"><div class="metric">PJ+</div><p>更适合脆弱模型，先保住 parseability。</p></div>
+        <div class="card"><div class="metric">WV</div><p>最终瓶颈是字段值真实性，不是 JSON 括号。</p></div>
+      </div>
+    </section>
+  </main>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/07/PaperReadings/llmstructbench/">http://nanamiakari.github.io/2026/05/07/PaperReadings/llmstructbench/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/%E7%BB%93%E6%9E%84%E5%8C%96%E6%95%B0%E6%8D%AE/">结构化数据</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/02/PaperReadings/schematiq/" title="ScheMatiQ: 从研究问题到可验证数据表"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">ScheMatiQ: 从研究问题到可验证数据表</div></div></a></div><div><a href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">SCHEMA-MINERpro: 让机器读懂科学实验流程</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">16</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">21</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程">SCHEMA-MINERpro: 让机器读懂科学实验流程</a><time datetime="2026-05-13T07:50:48.000Z" title="发表于 2026-05-13 15:50:48">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格">Docs2Table: 从多文档到结构化表格</a><time datetime="2026-05-13T07:48:15.000Z" title="发表于 2026-05-13 15:48:15">2026-05-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分">CONSTRUCT: 结构化输出的实时可信度评分</a><time datetime="2026-05-07T02:37:02.000Z" title="发表于 2026-05-07 10:37:02">2026-05-07</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准">LLMStructBench: 结构化数据抽取基准</a><time datetime="2026-05-07T02:35:41.000Z" title="发表于 2026-05-07 10:35:41">2026-05-07</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>
