@@ -4,6 +4,76 @@
   
     
     <entry>
+      <title>data-platform-investigator Skill 讲解</title>
+      <link href="/2026/05/28/DataEngine/data-platform-investigator-skill-guide/"/>
+      <url>/2026/05/28/DataEngine/data-platform-investigator-skill-guide/</url>
+      
+        
+        <content type="html"><![CDATA[data-platform-investigator Skill 讲解 1. 这个 Skill 是什么 data-platform-investigator 是一个专门用于调查数据中台资源的 Codex Skill。 简单说，它的作用是： 当用户用自然语言问“某个业务数据在哪里”“应该用哪些表”“字段是什么意思”“这张表是不是物理表&#x2F;逻辑表&#x2F;血缘过程”时，指导 Codex 按固定流程去查业务目录、标准字典、Hive 元数据和 DataRiver 血缘，并给出有证据的答案。 它不是一个普通脚本，也不是一个单独服务。它更像是一份“调查手册 + 工具清单 + 安全边界”。 Codex 看到类似问题时，会先读这个 Skill，然后按里面的流程做事。 例如用户问： 1 帮我查一下学生期末评价完成状态应该用哪些表，字段大概是什么含义 这个 Skill 会指导 Codex： 先从业务目录和标准字典里找候选资源。 再确认这些候选资源是不是真实 Hive 表。 再查字段、字段注释、存储位置。 再看 DataRiver 里有没有血缘或加工过程。 最后把“应该用哪张表、字段是什么意思、为什么这么判断”讲清楚。 2. 它解决的核心问题 数据中台里常见的问题是：业务人员说的是业务名，技术系统里保存的是表名、字段名、元数据和血缘节点。 两边经常对不上。 例如： 用户说法 系统里的东西 学生期末评价完成状态 ods_mks_xsqmpjwczt 、 ods_mks_xsqmpjwczt_z 学号 xh 是否完成评价 pjzt 学年学期 xnxq 课程名称 kcmc 如果只靠表名搜索，容易漏掉业务含义。 如果只靠标准字典，可能知道“应该相关”，但不一定知道真实字段。 如果只看 Hive，能看到字段，但不知道这张表和业务资源有什么关系。 如果只看 DataRiver，能看到血缘，但不一定能解释给业务人员听。 所以这个 Skill 的核心思路是： 不依赖单一证据，而是把业务目录、标准字典、Hive 元数据、DataRiver 血缘放在一起交叉验证。 3. 它遵守的安全边界 这个 Skill 默认只做“元数据调查”。 它可以查： 业务目录里有哪些资源。 标准字典里有哪些概念、别名、推荐表。 Hive Metastore 里的表名、字段名、字段类型、字段注释、存储位置。 DataRiver 里的表节点、字段节点、加工过程、血缘关系。 Kubernetes 里元数据服务的只读状态。 它默认不做： 不改表。 不删数据。 不改任务。 不改权限。 不重启服务。 不查询业务明细行。 不打印 token、密码、API Key、kubeconfig、 .env 中的敏感值。 这一点很重要。 比如它会查 Hive Metastore 的 COLUMNS_V2 来知道字段含义，但不会直接： 1 SELECT * FROM emr.ods_mks_xsqmpjwczt; 因为那就变成查业务明细数据了。 4. 整体工作流程 这个 Skill 的工作流程可以理解成四层证据。 1 2 3 4 5 6 7 8 9 10 flowchart TD A["用户问题<br/>例如：学生期末评价完成状态"] --> B["业务目录检索<br/>catalog-search"] A --> C["标准字典匹配<br/>standard-grounding"] B --> D["候选表<br/>ods_mks_xsqmpjwczt<br/>ods_mks_xsqmpjwczt_z"] C --> D D --> E["Hive Metastore 确认<br/>真实表、字段、注释、位置"] D --> F["DataRiver 图谱确认<br/>data_table / data_column / process"] E --> G["综合判断"] F --> G G --> H["回答用户<br/>推荐表、字段含义、血缘证据、限制"] 每一层的作用不一样。 层级 作用 典型证据 业务目录 从业务资源角度找表 资源名、业务系统、部门、资源类型 标准字典 从语义角度扩展和匹配 概念、别名、推荐表、字段关键词 Hive Metastore 确认真实物理表和字段 表、字段、类型、注释、HDFS 位置 DataRiver 确认血缘和加工关系 表节点、字段节点、DataBridge process 5. 它如何判断用户意图 Skill 会先判断用户到底想问什么。 5.1 自然语言业务查询 例如： 1 2 3 学生期末评价完成状态在哪里？ 一卡通交易流水用哪张表？ 收费系统退费数据在哪？ 这种情况先走业务搜索： 1 2 npm run cli -- catalog-search "<业务问题>" npm run cli -- business-search "<业务问题>" 如果启用了标准字典，还会走： 1 npm run cli -- standard-grounding "<业务问题>" --include-relations 5.2 明确给出表名 例如： 1 帮我看一下 ods_mks_xsqmpjwczt 是什么表 这种情况优先把它当成表名或资源名： 1 2 npm run cli -- resolve-resource ods_mks_xsqmpjwczt npm run cli -- describe-table-detail ods_mks_xsqmpjwczt --database emr 5.3 需要给 AI 上下文 例如： 1 给模型生成一下学生评价相关的数据上下文 这种情况会整理成 AI 更容易使用的结构： 业务意图。 主候选表。 字段字典。 表层级。 血缘证据。 AI 解析建议。 注意事项。 5.4 用户明确说“用 doops 查” 例如： 1 用 doops 查 这时 Skill 会把 doops 当成线上元数据通道。 也就是说，不再只看本地目录和字典，而是通过 doops 连接数据中台集群，再查线上 Hive Metastore 和 DataRiver 元数据库。 6. MCP 和 doops 分别负责什么 这里容易混淆。 可以这样理解： 工具 角色 适合做什么 MCP &#x2F; CLI 本地元数据工具 查业务目录、标准字典、封装好的元数据接口 doops 线上连接通道 通过 doops-agent 到数据中台集群执行只读命令 Hive Metastore 真实表结构来源 查物理表、字段、字段注释、存储位置 DataRiver 血缘来源 查逻辑表、字段节点、加工任务、DataBridge process 也就是说： MCP 负责“怎么理解数据中台”，doops 负责“怎么安全连到线上元数据环境”。 doops 本身不解释业务。 业务解释仍然由 data-platform-investigator 完成。 7. 为什么要先查本地目录和字典，再查 doops 如果用户只说“学生期末评价完成状态”，直接去 Hive 里搜会很难，因为 Hive 里没有中文业务名，只有类似： 1 2 ods_mks_xsqmpjwczt ods_mks_xsqmpjwczt_z 所以流程是： 本地业务目录先把中文资源名映射到候选表。 标准字典再确认这个业务概念、别名、推荐表。 doops 再去线上查这些候选表是否真实存在。 Hive Metastore 给出真实字段。 DataRiver 给出血缘证据。 这样做的好处是： 搜索范围小。 结果更准。 不容易把无关表混进来。 回答时能说明“为什么是这张表”。 8. doops 线上确认流程 当需要 doops 时，Skill 会走一套只读确认流程。 8.1 确认元数据服务 先看 Hive 和 DataRiver 的元数据 Pod 是否存在。 典型目标是： 1 2 emr-hive/mysql-hive-1-5gzxn datariver-prod/mysql-metadata-1-z95js 这些不是业务表，而是保存元数据的 MySQL。 8.2 查 Hive Metastore 查询的是 Hive Metastore 元数据表，例如： Metastore 表 用途 DBS 数据库信息 TBLS 表信息 SDS 存储位置 COLUMNS_V2 字段名、类型、注释 TABLE_PARAMS 表注释、统计参数 PARTITION_KEYS 分区字段 这样能知道： 表是否真实存在。 表在哪个数据库。 表是不是物理表。 表的 HDFS 位置。 字段有哪些。 字段类型是什么。 字段注释是什么。 8.3 查 DataRiver 图谱 DataRiver 元数据图谱里常见三类节点： 节点类型 含义 data_table 表节点 data_column 字段节点 process 加工过程、同步过程、血缘过程 比如能看到： 1 2 xs_qmpjzt -> ods_mks_xsqmpjwczt xs_pjzt_z -> ods_mks_xsqmpjwczt_z 这说明不是只靠名字猜表，而是线上确实存在数据加工关系。 9. 新增的两个 helper 脚本 这次 Skill 里新增了两个脚本，目的是把容易出错的 doops + PowerShell + WSL + SQL 引号问题封装起来。 9.1 doops-hive-metadata.ps1 路径： 1 skill/data-platform-investigator/scripts/doops-hive-metadata.ps1 作用： 用 doops 连接线上环境，然后查 Hive Metastore。 示例： 1 2 3 powershell -NoProfile -ExecutionPolicy Bypass ` -File skill\data -platform-investigator \scripts\doops -hive-metadata .ps1 ` -Table ods_mks_xsqmpjwczt,ods_mks_xsqmpjwczt_z 它会输出类似： 1 2 3 TABLE emr ods_mks_xsqmpjwczt MANAGED_TABLE ... 学生期末评价完成状态 COLUMN emr ods_mks_xsqmpjwczt 2 xh string 学号 COLUMN emr ods_mks_xsqmpjwczt 5 pjzt bigint 是否完成评价（0否，1是） 9.2 doops-datariver-search.ps1 路径： 1 skill/data-platform-investigator/scripts/doops-datariver-search.ps1 作用： 用 doops 搜 DataRiver 的 t_vertex 分片，找表、字段和 process 节点。 示例： 1 2 3 powershell -NoProfile -ExecutionPolicy Bypass ` -File skill\data -platform-investigator \scripts\doops -datariver-search .ps1 ` -Term ods_mks_xsqmpjwczt 它会输出类似： 1 2 3 VERTEX t_vertex_7 data_table dr.Tenant.1.2.ods_mks_xsqmpjwczt VERTEX t_vertex_13 data_column dr.Tenant.1.2.ods_mks_xsqmpjwczt.pjzt VERTEX t_vertex_19 process ...xs_qmpjzt...ods_mks_xsqmpjwczt 10. 为什么脚本里用了 base64 这是为了稳定。 Windows PowerShell、WSL、bash、doops、远端容器 shell、SQL 之间会有很多层引号。 如果直接写： 1 doops exec ... -cmd "kubectl exec ... mysql -e \" select ...\ "" 很容易出现： 参数被截断。 管道符被提前解析。 单引号和双引号错位。 SQL 没有完整传到远端。 所以脚本采用的做法是： 在本地生成一段远端脚本。 把脚本 base64 编码。 通过 doops 传到远端。 远端再 base64 解码并执行。 这相当于把复杂命令包成一个“安全包裹”，减少引号问题。 11. 实际例子：学生期末评价完成状态 下面用之前查过的例子说明整个 Skill 是怎么工作的。 11.1 用户问题 1 帮我查一下学生期末评价完成状态 11.2 业务目录命中 业务目录找到两个资源： 资源名 表名 业务系统 部门 学生期末评价完成状态 ods_mks_xsqmpjwczt 麦可思教学质量管理系统 教务处 学生期末评价完成状态… ods_mks_xsqmpjwczt_z 麦可思教学质量管理系统 教务处 11.3 标准字典命中 标准字典把“学生期末评价完成状态”识别成一个业务概念： 1 2 3 4 5 6 7 8 9 10 概念：学生期末评价完成状态 领域：麦可思教学质量管理系统 推荐表： - ods_mks_xsqmpjwczt - ods_mks_xsqmpjwczt_z 关键词： - 评价 - 学号 - 学生期末评价完成 - 状态 这说明候选表不是纯表名搜索出来的，而是和业务语义对上了。 11.4 Hive Metastore 确认 线上 Hive Metastore 确认两张表都是真实物理表： 表 表注释 存储位置 emr.ods_mks_xsqmpjwczt 学生期末评价完成状态 hdfs://hdfs2/user/hive/warehouse/emr.db/ods_mks_xsqmpjwczt emr.ods_mks_xsqmpjwczt_z 学生期末评价完成状态_总 hdfs://hdfs2/user/hive/warehouse/emr.db/ods_mks_xsqmpjwczt_z 字段如下。 emr.ods_mks_xsqmpjwczt ： 字段 类型 注释 wid string 主键 xnxq string 学年学期 xh string 学号 kch string 课程代码 kcmc string 课程名称 pjzt bigint 是否完成评价（0否，1是） updatetime timestamp 更新时间 emr.ods_mks_xsqmpjwczt_z ： 字段 类型 注释 wid string 主键 xnxq string 学年学期 xh string 学号 pjzt bigint 是否完成评价（0否，1是） updatetime timestamp 更新时间 11.5 DataRiver 血缘确认 DataRiver 里能看到相关 process： 1 2 xs_qmpjzt -> ods_mks_xsqmpjwczt xs_pjzt_z -> ods_mks_xsqmpjwczt_z 这说明： ods_mks_xsqmpjwczt 对应学生期末评价完成状态明细。 ods_mks_xsqmpjwczt_z 对应学生期末评价完成状态汇总。 11.6 最终解释 所以 Skill 最终会这样回答： 需求 推荐表 查某个学生某门课是否完成评价 emr.ods_mks_xsqmpjwczt 查某个学生某学期总体是否完成评价 emr.ods_mks_xsqmpjwczt_z 原因是： 明细表有 kch 和 kcmc ，能定位课程。 汇总表没有课程字段，更像学生学期维度的总状态。 表注释里 _z 表叫“学生期末评价完成状态_总”。 DataRiver 也有对应的加工过程。 12. 输出答案时的判断原则 这个 Skill 要求回答不是只给结论，而是尽量带证据。 一个好的回答一般包括： 主候选表。 每张表适合什么场景。 字段含义。 业务目录证据。 Hive 元数据证据。 DataRiver 血缘证据。 限制说明。 例如： 1 2 这次只查了元数据，没有查业务明细行。 元数据里的 dataCount/sizeFull 为 0 只能说明元数据统计值是 0，不能直接等同于业务表一定无数据。 这种限制说明很重要，因为它能防止把“元数据指标”误当成“业务真实数据量”。 13. 如何人工复核 人工复核时可以按下面顺序看。 13.1 看业务目录是否命中正确业务 重点看： resourceName 是否和用户问题一致。 businessName 是否是正确业务系统。 department 是否合理。 tableName 是否是候选表。 13.2 看标准字典是否只是语义匹配 标准字典适合判断“像不像”，但不能单独证明字段真实存在。 因此字典结果要继续被 Hive 元数据确认。 13.3 看 Hive 字段注释 字段注释是最直接的字段解释来源。 例如： 1 pjzt bigint 是否完成评价（0否，1是） 这比模型猜测可靠得多。 13.4 看 DataRiver process process 可以说明这张表是怎么来的。 比如： 1 xs_qmpjzt -> ods_mks_xsqmpjwczt 这说明它来自麦可思相关的评价状态源数据加工。 14. 常见误区 14.1 看到 _z 就一定是最终表吗 不一定。 这个 Skill 不允许只靠后缀判断。 比如 _z 可能表示： 总表。 中间表。 转换表。 暂存表。 业务系统自己的命名习惯。 必须结合： 表注释。 字段差异。 DataRiver process 名称。 上下游关系。 在“学生期末评价完成状态”里， _z 表注释是“学生期末评价完成状态_总”，并且字段少了课程信息，所以可以判断它更像汇总表。 14.2 字典推荐表就是最终答案吗 不是。 字典推荐表只是候选。 最终还要看： Hive 是否真实存在。 字段是否符合需求。 DataRiver 是否有血缘证据。 14.3 metadata 里的 dataCount=0 等于表没数据吗 不能直接这么说。 dataCount 、 sizeFull 、 resourceAmount 、 dataAmount 都是元数据或目录统计值。 它们可能没有更新，也可能只是某个系统里的统计字段。 如果真要确认表里有没有业务数据，需要额外做只读行数查询，但这超出了默认元数据调查边界，需要用户明确要求。 15. 这个 Skill 和 doops Skill 的关系 data-platform-investigator 和 doops 是配合关系。 1 2 3 4 5 6 flowchart LR A["data-platform-investigator<br/>负责业务理解和证据判断"] --> B["doops<br/>负责连接线上环境"] B --> C["Hive Metastore<br/>真实表字段"] B --> D["DataRiver Metadata<br/>血缘图谱"] C --> A D --> A 可以这样记： Skill 负责什么 data-platform-investigator 判断数据资源、解释字段、整理证据 doops 连接集群、执行只读命令、查看元数据服务 data-platform-ops Kubernetes&#x2F;EMR&#x2F;组件运维视角的只读分析 如果用户问“某个业务数据在哪”，主 Skill 是 data-platform-investigator 。 如果用户问“用 doops 查一下”， data-platform-investigator 会借助 doops 。 如果用户问“某个 Pod 为什么异常”，更偏 data-platform-ops 或 doops 。 16. 一句话总结 data-platform-investigator 的本质是一套“只读、证据驱动的数据中台调查流程”。 它把用户的业务问题翻译成数据中台里的候选表，再用业务目录、标准字典、Hive 元数据和 DataRiver 血缘逐层确认，最后给出能解释、能复核、风险可控的答案。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据工程 </tag>
+            
+            <tag> 数据中台 </tag>
+            
+            <tag> Skill </tag>
+            
+            <tag> 元数据 </tag>
+            
+            <tag> DataEngine </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>头条文章《企业数据资产管理核心框架：L1-L5分层架构解析》阅读汇报</title>
+      <link href="/2026/05/28/DataEngine/toutiao-l1-l5-data-asset-report/"/>
+      <url>/2026/05/28/DataEngine/toutiao-l1-l5-data-asset-report/</url>
+      
+        
+        <content type="html"><![CDATA[头条文章《企业数据资产管理核心框架：L1-L5分层架构解析》阅读汇报 来源： 今日头条文章 标题：企业数据资产管理核心框架：L1-L5分层架构解析 发布时间：2026-05-27 11:02 作者：星语拾闻 整理时间：2026-05-28 一、文章核心内容 这篇文章讲的是企业如何用 L1-L5 五层结构管理数据资产。它的核心思想不是“多建几层目录”，而是把一个模糊的业务问题，逐步翻译成技术系统里可以查到的表和字段。 最简单的理解方式是：L1-L5 是一个从业务到数据的放大镜。 1 2 3 4 5 L1 业务域：公司在做哪一大块事 L2 主题域：这块业务里有哪些主题 L3 业务对象：这个主题里管理的核心东西是什么 L4 逻辑实体：这个东西在数据模型里拆成哪些表/实体 L5 属性：每张表/实体里有哪些字段 文章认为，这套分层结构来自数据仓库和企业架构实践，主要受维度建模、范式建模和企业架构框架影响。它要解决的是企业数据管理中常见的几个问题：数据孤岛、口径不一、业务人员看不懂、技术人员难复用、同名不同义、同义不同名。 二、L1-L5 到底是什么关系 L1-L5 不是五个并列分类，而是一条逐层变具体的链路： 1 大业务 -> 小主题 -> 业务对象 -> 数据实体/表 -> 字段 换句话说： L1-L3 更偏业务语言，是业务人员能理解的说法。 L4-L5 更偏技术语言，是数据系统里真正落地的表和字段。 L1-L5 的价值，就是把业务语言翻译成技术语言。 层级 通俗问题 解释 例子 L1 业务域 这是哪块大业务？ 企业最高层的业务范围 教学管理、一卡通、收费、科研、人事 L2 主题域 这块业务下哪个主题？ 对业务域继续细分 学生管理、交易管理、收费管理、论文成果 L3 业务对象 业务人员关心的东西是什么？ 业务中的核心名词 学生、交易流水、收费单、论文 L4 逻辑实体 系统里用什么实体&#x2F;表承载？ 业务对象在数据模型里的结构化表达 std_bksjw_xsbjxx 、 dwd_ykt_jylsxx L5 属性 表里具体有哪些字段？ 字段、数据项、代码值 学号、姓名、交易金额、交易时间 三、两个直观例子 例子一：学生基本信息。 1 2 3 4 5 L1 教学管理 -> L2 学生管理 -> L3 学生 -> L4 学生基本信息实体 -> L5 学号、姓名、性别、学院、专业、班级 这条链路表达的是：用户问“学生信息在哪里”，系统不要直接猜表名，而是先理解这是“教学管理”下面“学生管理”主题里的“学生”对象，然后再找到承载学生对象的逻辑实体和字段。 例子二：一卡通交易流水。 1 2 3 4 5 L1 一卡通业务 -> L2 交易管理 -> L3 交易流水 -> L4 ods_ykt_jylsxx / dwd_ykt_jylsxx -> L5 jylsh、jyje、jysj、khxm、kh 这条链路表达的是：用户说“一卡通交易流水和交易金额”，系统应该识别出业务对象是“交易流水”，再找到 ODS&#x2F;DWD 中对应的交易流水表，最后定位交易金额、交易时间、卡号、姓名等字段。 四、自然语言问题如何拆成 L1-L5 假设用户问： 1 审计上报的一卡通交易流水和交易金额字段在哪里？ 用 L1-L5 拆解后就是： 1 2 3 4 5 L1：一卡通业务 L2：交易管理 L3：交易流水 L4：dwd_ykt_jylsxx / ods_ykt_jylsxx L5：jyje、jysj、jylsh、kh、khxm 等字段 这就是 L1-L5 对 AI 检索最重要的价值：AI 不再直接从一句话里猜表，而是先判断业务对象，再用业务对象去约束候选表和字段。这样返回结果更稳定，也更容易解释“为什么命中这张表”。 五、文章提到的平台化能力 文章以数据资产管理平台为例，说明 L1-L5 可以通过平台功能落地： 能力 说明 层级属性管理 每层目录可以维护不同属性，例如所属部门、责任人、是否必填、维护方式等。 分层架构管理 支持业务域、主题域、业务对象、逻辑实体、属性之间的级联关系。 批量发布 对实体表数量很大的场景，支持整库发布、批量发布，便于初始化资产目录。 分层查询与审计 支持目录查询、发布、下线和变更审计，便于追踪资产目录生命周期。 文章的结论是：只有被清楚定义、标准化和治理的数据，才能成为可复用、可信任、可运营的数据资产。 六、对 data-skill-schema-minerpro 的参考价值 D:\AGENT\data-skill-schema-minerpro 当前已经有很多和 L1-L5 思路相近的能力： mcp/data/catalog.json 承载业务资源目录。 mcp/data/standard-dictionary*.json 承载标准业务概念、别名、优先表、字段关键词和关系。 mcp/src/standard-dictionary.js 已实现自然语言到标准概念的 grounding、术语扩展、目录重排和关系扩展。 get_ai_business_context 、 business_search 、 standard_business_search 已经在做“业务问题 -> 候选表&#x2F;字段&#x2F;血缘证据”的转换。 docs/full-dictionary-review-pack.html 已经具备人工复核闭环的雏形。 文章给这个项目最大的启发是：当前项目不要只把标准字典当作“检索增强词表”，而可以进一步把它升级成 L1-L5 数据资产语义路径。 也就是说，项目最终不只是回答： 1 这张表在哪里？ 而是回答： 1 2 3 4 5 6 这个数据属于哪个业务域？ 属于哪个主题？ 描述的是哪个业务对象？ 由哪些逻辑实体/真实表承载？ 关键字段有哪些？ 为什么这些表和字段可信？ 七、建议的项目映射方式 可以把当前项目中的对象按 L1-L5 重新解释和补强： L1-L5 层级 当前项目中的可能承载位置 建议补强点 L1 业务域 catalog.json 中的业务分类、部门、系统域；标准字典中的 domain 明确区分“组织部门”“业务域”“系统来源”，避免混用。 L2 主题域 标准字典概念分组、资源目录类别 增加 subjectArea 字段，表示教学、科研、收费、一卡通、图书、人事等主题。 L3 业务对象 standard-dictionary 中的概念 id 、 label 、 aliases 把概念设计成业务对象优先，而不是表名优先，例如“学生”“收费单”“交易流水”。 L4 逻辑实体 preferredTables 、Hive 真实表、DataRiver 逻辑表或 process 节点 区分“业务对象”与“逻辑实体&#x2F;表”的一对多关系，支持实体组整体前置。 L5 属性 Hive 字段、字段注释、 fieldKeywords 、AI 字段上下文 增加字段级标准定义、代码值、同义字段、敏感级别和质量规则。 更适合本项目的目标链路是： 1 2 3 4 5 6 7 自然语言问题 -> 识别 L3 业务对象 -> 补齐 L1/L2 业务上下文 -> 找到 L4 逻辑实体/真实表 -> 定位 L5 字段语义、字段标准、字段证据 -> 合并 Hive + DataRiver + catalog 证据 -> 返回可解释结果，并进入人工复核闭环 这里把 L3 放在前面，是因为用户自然语言里最常说的通常不是“业务域”，而是业务对象。例如用户会说“学生”“一卡通交易流水”“收费退款”“科研论文”，这些词更接近 L3。系统识别出 L3 后，再向上补齐 L1&#x2F;L2，向下找到 L4&#x2F;L5。 八、可落地改进建议 1. 在标准字典中增加 L1-L5 路径字段 建议在 standard-dictionary*.json 的概念结构中增加类似字段： 1 2 3 4 5 6 7 &#123; "businessDomain" : "教学管理" , "subjectArea" : "学生管理" , "businessObject" : "学生" , "logicalEntities" : [ "std_bksjw_xsbjxx" , "std_yjsjw_xsjbxx" ] , "attributeGroups" : [ "身份信息" , "学籍信息" , "院系专业信息" ] &#125; 这样 grounding 结果不仅能告诉用户“命中了哪个概念”，还可以告诉用户“它处在什么业务域、主题域、对象和实体路径下”。 2. 把 domain 从单一字段升级为层级模型 当前标准字典里的 domain 更像粗粒度分类。可以逐步迁移为： 1 2 domainPath = [业务域, 主题域, 业务对象] entityPath = [逻辑实体, 字段] 这会让检索结果更可解释，也更利于后续做目录树、复核页面和评测。 3. 增加 L1-L5 路径准确率评测 现有评测关注 P@K、R@K、MRR、conceptRecall、relationAccuracy。可以增加： domainAccuracy ：业务域是否识别正确。 subjectAccuracy ：主题域是否识别正确。 objectAccuracy ：业务对象是否识别正确。 entityRecall ：逻辑实体&#x2F;表是否召回。 attributeRecall ：关键字段是否召回。 pathCompleteness ：是否返回完整 L1-L5 路径。 这能让项目从“表检索效果评测”升级为“数据资产语义路径评测”。 4. 在人工复核页中加入分层审核 当前项目已有 full-dictionary-review-pack.html ，后续可以把复核项拆成： 业务域是否正确。 主题域是否正确。 业务对象是否正确。 逻辑实体&#x2F;表是否正确。 字段语义是否正确。 关系扩展是否有误导。 这样人工复核不只判断结果是否命中，还能沉淀出可回写字典的治理信息。 5. 把 DataRiver 血缘用于补强 L4 逻辑实体关系 文章中的 L4 强调实体关系。当前项目已经能查 DataRiver 顶点和血缘，因此可以把 DataRiver 的 process、logical table、field 节点转化为 L4 关系证据。例如： 1 2 3 业务对象：一卡通交易流水 逻辑实体：ods_ykt_jylsxx、dwd_ykt_jylsxx 关系证据：ODS -> DWD 清洗链路、字段映射、process 节点 这比单纯维护 preferredTables 更接近“数据资产模型”。 九、需要注意的局限 这篇文章是方法论和产品化介绍，偏框架说明，不包含具体的数据结构设计、算法、评测方法或开源实现。因此对 data-skill-schema-minerpro 的价值主要是“架构命名与治理方向参考”，不能直接替代当前项目已经形成的标准字典、MCP 工具、DeepSeek 混合评测和人工复核流程。 更合理的做法不是照搬文章的产品功能，而是把文章中的 L1-L5 分层思想，嫁接到当前项目已有的业务目录检索、标准字典 grounding、Hive 表字段元数据、DataRiver 血缘、LLM 运行时过滤和人工复核评测中。 十、结论 这篇文章对 data-skill-schema-minerpro 的最大参考价值，是帮助项目从“自然语言找表&#x2F;找字段”进一步升级为“基于 L1-L5 语义路径的数据资产理解系统”。 短期可以先做三件事： 给标准字典概念增加 L1-L5 分层字段。 在 grounding 和检索结果中返回 domainPath 、 entityPath 和字段证据。 在评测和人工复核中加入 L1-L5 路径准确性。 中期再把这些分层结果沉淀为资产目录治理能力，使 MCP&#x2F;Skill 不仅能回答“数据在哪张表”，还能解释“它属于哪个业务域、哪个主题、哪个业务对象、哪些逻辑实体和哪些标准字段”。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据工程 </tag>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 数据治理 </tag>
+            
+            <tag> 数据资产 </tag>
+            
+            <tag> L1-L5 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>In-depth Analysis of LLM-based Schema Linking</title>
       <link href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/"/>
       <url>/2026/05/27/PaperReadings/llm-schema-linking-analysis/</url>
@@ -94,11 +164,11 @@
             
             <tag> 数据中台 </tag>
             
+            <tag> DataEngine </tag>
+            
             <tag> 标准字典 </tag>
             
             <tag> 数据治理 </tag>
-            
-            <tag> DataEngine </tag>
             
             <tag> DeepSeek </tag>
             
@@ -131,11 +201,11 @@
             
             <tag> 数据中台 </tag>
             
+            <tag> DataEngine </tag>
+            
             <tag> 标准字典 </tag>
             
             <tag> 数据治理 </tag>
-            
-            <tag> DataEngine </tag>
             
             <tag> DeepSeek </tag>
             
@@ -170,11 +240,11 @@
             
             <tag> 元数据 </tag>
             
+            <tag> DataEngine </tag>
+            
             <tag> 标准字典 </tag>
             
             <tag> 数据治理 </tag>
-            
-            <tag> DataEngine </tag>
             
         </tags>
       
