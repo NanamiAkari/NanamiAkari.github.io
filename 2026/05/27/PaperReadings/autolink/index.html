@@ -1,0 +1,780 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>AutoLink: Agentic Schema Linking for Text-to-SQL | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="AAAI 2026 · Text-to-SQL · Schema Linking       AutoLink：让智能问询自己找字段       这篇论文把 schema linking 从“一次性把全库 schema 塞给 LLM”改造成“agent 逐步探索、检索、验证、扩展字段”的过程。对 skill + MCP 连接数据库的智能问询系统，参考价值非常直接。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AutoLink: Agentic Schema Linking for Text-to-SQL">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/05/27/PaperReadings/autolink/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="AAAI 2026 · Text-to-SQL · Schema Linking       AutoLink：让智能问询自己找字段       这篇论文把 schema linking 从“一次性把全库 schema 塞给 LLM”改造成“agent 逐步探索、检索、验证、扩展字段”的过程。对 skill + MCP 连接数据库的智能问询系统，参考价值非常直接。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-05-27T05:50:43.000Z">
+<meta property="article:modified_time" content="2026-05-28T05:18:12.117Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="Schema Linking">
+<meta property="article:tag" content="Text-to-SQL">
+<meta property="article:tag" content="Agent">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/05/27/PaperReadings/autolink/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'AutoLink: Agentic Schema Linking for Text-to-SQL',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-05-28 13:18:12'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/paper-inline.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">AutoLink: Agentic Schema Linking for Text-to-SQL</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-05-27T05:50:43.000Z" title="发表于 2026-05-27 13:50:43">2026-05-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-05-28T05:18:12.117Z" title="更新于 2026-05-28 13:18:12">2026-05-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%B7%A5%E7%A8%8B/">数据工程</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.9k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="AutoLink: Agentic Schema Linking for Text-to-SQL"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-autolink">
+<header>
+    <div class="hero">
+      <div class="eyebrow">AAAI 2026 · Text-to-SQL · Schema Linking</div>
+      <h1>AutoLink：让智能问询自己找字段</h1>
+      <p class="subtitle">这篇论文把 schema linking 从“一次性把全库 schema 塞给 LLM”改造成“agent 逐步探索、检索、验证、扩展字段”的过程。对 skill + MCP 连接数据库的智能问询系统，参考价值非常直接。</p>
+      <div class="hero-meta">
+        <span class="pill">论文：AutoLink</span>
+        <span class="pill">场景：大规模数据库 Text-to-SQL</span>
+        <span class="pill">核心：schema exploration + vector search + verification</span>
+        <span class="pill">代码：github.com/wzy416/AutoLink</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#idea">核心想法</a>
+      <a href="#problem">解决什么</a>
+      <a href="#method">方法拆解</a>
+      <a href="#actions">Action Space</a>
+      <a href="#experiments">实验结果</a>
+      <a href="#mcp">对 MCP 项目的启发</a>
+      <a href="#critique">审稿式评价</a>
+    </div>
+  </nav>
+
+  <section id="idea">
+    <div class="wrap">
+      <div class="section-kicker">One sentence</div>
+      <h2>AutoLink 的关键不是写 SQL，而是先把“该用哪些字段”找全。</h2>
+      <p class="lead">在真实业务库里，表和列可能非常多。把所有 schema 都交给 LLM 会带来两个问题：上下文太长，以及无关字段太多。AutoLink 的做法是：先给模型少量候选字段和全表名，再让模型像数据库工程师一样，通过检索、探查、试跑 SQL 来逐步补齐必要 schema。</p>
+      <div class="grid">
+        <div class="card">
+          <div class="metric">97.4%</div>
+          <div class="metric-label">Bird-Dev strict schema linking recall</div>
+          <p>论文报告 AutoLink 在 Bird-Dev 上达到 97.4% SRR，同时 SQL 执行准确率为 68.71%。</p>
+        </div>
+        <div class="card">
+          <div class="metric">91.2%</div>
+          <div class="metric-label">Spider 2.0-Lite strict recall</div>
+          <p>Spider 2.0-Lite 更接近企业级数据库，平均列数超过 800，AutoLink 在这里的优势尤其明显。</p>
+        </div>
+        <div class="card">
+          <div class="metric">21.2K</div>
+          <div class="metric-label">Spider 2.0-Lite schema linking avg tokens</div>
+          <p>相比部分 full-schema 方法动辄 160K+ tokens，AutoLink 通过迭代扩展显著降低上下文成本。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problem" class="band">
+    <div class="wrap">
+      <div class="section-kicker">Motivation</div>
+      <h2>传统 schema linking 在大库里容易卡在三个地方。</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>上下文限制</h3>
+          <p>数据库级方法常把完整 schema 和问题一起塞进 LLM。小库可行，大库会触发上下文窗口、费用和噪声问题。</p>
+        </div>
+        <div class="card">
+          <h3>逐字段打分太贵</h3>
+          <p>element-level 方法会对每个 table/column 打分，复杂度接近 \(O(|S|)\)。schema 越大，延迟和成本越难控。</p>
+        </div>
+        <div class="card">
+          <h3>召回和噪声冲突</h3>
+          <p>为了不漏字段，检索器通常返回很多候选；候选越多，SQL 生成阶段又越容易被无关字段干扰。</p>
+        </div>
+      </div>
+      <div class="formula">
+        $$S_{linked} \subset S_{full}$$
+        <p>AutoLink 的目标不是压到最少字段，而是在 token 可控的前提下，尽量保证 \(S_{linked}\) 包含回答问题所需的所有 gold schema elements。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="wrap">
+      <div class="section-kicker">Method</div>
+      <h2>它把字段识别变成了一个 agent 的多轮决策问题。</h2>
+      <p class="lead">AutoLink 不要求 agent 看到完整列清单。它只暴露两个外部环境：真实数据库环境 \(E_{DB}\) 和 schema vector store 环境 \(E_{VS}\)。模型每轮输出 reasoning trace 和 actions，环境执行后返回 observation，直到模型认为 schema 足够完整。</p>
+      <div class="flow">
+        <div class="step">
+          <div>
+            <span class="num">1</span>
+            <h3>初始检索</h3>
+            <p>用原始问题从向量库取 top-n 字段，形成初始 \(S_{linked}^{(0)}\)。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">2</span>
+            <h3>表名上下文</h3>
+            <p>给 agent 全部表名，但不给全部字段，降低上下文噪声。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">3</span>
+            <h3>语义检索</h3>
+            <p>当发现缺字段时，用更具体的自然语言查询调用 vector store。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">4</span>
+            <h3>SQL 探查</h3>
+            <p>通过小 SQL 查元数据、样例值、外键或字段名模式。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">5</span>
+            <h3>验证停止</h3>
+            <p>尝试 draft SQL，如果能执行且 schema 充分，就结束。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/autolink/inline/asset-01.png" alt="AutoLink framework overview" />
+        <div class="caption">论文 Figure 1：AutoLink 的整体流程，核心是 agent 在 Database Env 与 Vector Store Env 之间循环交互。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="actions" class="soft">
+    <div class="wrap">
+      <div class="section-kicker">Action space</div>
+      <h2>五个动作，刚好可以映射成 MCP tools。</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>动作</th>
+            <th>是否有环境反馈</th>
+            <th>论文里的作用</th>
+            <th>在你的项目里可以怎么落地</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>@explore_schema</strong></td>
+            <td>有</td>
+            <td>执行探索型 SQL，查字段、元数据、样例值、主外键，不直接回答问题。</td>
+            <td>MCP tool：只允许白名单 SQL，如 information_schema、PRAGMA、LIMIT sample。</td>
+          </tr>
+          <tr>
+            <td><strong>@retrieve_schema</strong></td>
+            <td>有</td>
+            <td>用自然语言概念从 schema vector store 检索缺失字段。</td>
+            <td>MCP tool：输入 query、top_k、exclude_columns，返回 table/column/type/comment/sample。</td>
+          </tr>
+          <tr>
+            <td><strong>@verify_schema</strong></td>
+            <td>有</td>
+            <td>尝试执行一条 draft SQL，判断当前 schema 是否足够。</td>
+            <td>MCP tool：dry-run 或 LIMIT 5 执行，返回错误、空结果、列不存在、类型问题。</td>
+          </tr>
+          <tr>
+            <td><strong>@add_schema</strong></td>
+            <td>无</td>
+            <td>把新发现的字段显式加入 \(S_{linked}\)。</td>
+            <td>内部状态更新：维护 confirmed fields、candidate fields、reason。</td>
+          </tr>
+          <tr>
+            <td><strong>@stop_action</strong></td>
+            <td>无</td>
+            <td>schema 足够完整或达到最大轮数时终止。</td>
+            <td>终止条件：字段覆盖、SQL 可执行、预算上限、风险检查通过。</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="formula">
+        $$S_{linked} \leftarrow S_{linked} \cup S_{added}$$
+        <p>这一步很适合做成结构化状态，而不是让模型在上下文里“隐式记住”。</p>
+      </div>
+      <pre class="code">{
+  "question": "列出 2024 年销售额最高的客户及所属区域",
+  "linked_schema": [
+    {"table": "orders", "column": "order_date", "reason": "时间过滤"},
+    {"table": "orders", "column": "amount", "reason": "销售额指标"},
+    {"table": "customers", "column": "customer_name", "reason": "输出字段"},
+    {"table": "regions", "column": "region_name", "reason": "维度字段"}
+  ],
+  "next_action": {
+    "tool": "verify_schema",
+    "args": {"draft_sql": "SELECT ... LIMIT 5"}
+  }
+}</pre>
+    </div>
+  </section>
+
+  <section id="experiments">
+    <div class="wrap">
+      <div class="section-kicker">Experiments</div>
+      <h2>实验重点：大 schema 下，AutoLink 召回掉得更慢。</h2>
+      <p class="lead">论文在 Bird-Dev 和 Spider 2.0-Lite 上评估。Bird-Dev 平均每库约 80 列；Spider 2.0-Lite 来自更真实的企业级场景，平均超过 800 列，包含 BigQuery、Snowflake、SQLite 多方言。</p>
+      <table>
+        <thead>
+          <tr>
+            <th>方法</th>
+            <th>Bird SRR</th>
+            <th>Bird Avg Columns</th>
+            <th>Bird Avg Tokens</th>
+            <th>Spider SRR all</th>
+            <th>Spider Avg Columns</th>
+            <th>Spider Avg Tokens</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>DE-SL (BGE-Large)</td><td>35.5</td><td>35.7</td><td>-</td><td>43.6</td><td>153.8</td><td>-</td></tr>
+          <tr><td>CE-SL (BGE-reranker)</td><td>72.4</td><td>35.7</td><td>-</td><td>57.6</td><td>153.8</td><td>-</td></tr>
+          <tr><td>MCS-SQL</td><td>85.7</td><td>7.5</td><td>29.8K</td><td>58.9</td><td>45.1</td><td>168.9K</td></tr>
+          <tr><td>SQL-to-Schema</td><td>92.5</td><td>13.5</td><td>19.4K</td><td>64.0</td><td>49.0</td><td>171.9K</td></tr>
+          <tr><td>RSL-SQL</td><td>93.3</td><td>13.0</td><td>14.8K</td><td>52.0</td><td>25.8</td><td>29.2K</td></tr>
+          <tr><td>LinkAlign</td><td>-</td><td>-</td><td>-</td><td>36.4</td><td>21.1</td><td>66.7K</td></tr>
+          <tr><td><strong>AutoLink</strong></td><td class="highlight">97.4</td><td>35.8</td><td class="highlight">8.0K</td><td class="highlight">91.2</td><td>159.4</td><td class="highlight">21.2K</td></tr>
+        </tbody>
+      </table>
+
+      <div class="grid two">
+        <div class="card">
+          <h3>SQL 执行准确率</h3>
+          <p>Spider 2.0-Lite 上，AutoLink + DeepSeek-R1 达到 34.92% EX，接近 ReFoRCE + GPT-o3 的 37.84%，但平均 token 约 38.0K，明显少于 ReFoRCE 的 81.1K。</p>
+        </div>
+        <div class="card">
+          <h3>消融实验</h3>
+          <p>去掉 @retrieve_schema 的影响最大；去掉 @explore_schema 和 @verify_schema 也会降低 SRR。这说明它的优势来自“检索 + 探索 + 验证”的组合，而不是单个提示词技巧。</p>
+        </div>
+      </div>
+
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/autolink/inline/asset-02.png" alt="Schema linking result table from paper" />
+        <div class="caption">论文 Table 1：Schema linking 对比结果。上方 HTML 表格已摘取关键列，图片保留原表上下文。</div>
+      </div>
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/autolink/inline/asset-03.png" alt="Execution accuracy and ablation result tables from paper" />
+        <div class="caption">论文 Table 2/3/4：SQL 执行准确率与 action ablation。</div>
+      </div>
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/autolink/inline/asset-04.png" alt="Scalability and hyperparameter analysis figures from paper" />
+        <div class="caption">论文 Figure 2/3：不同数据库规模与不同 initial top-n 下的 SRR、token 和 EX 变化。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mcp" class="band">
+    <div class="wrap">
+      <div class="section-kicker">For your project</div>
+      <h2>把 AutoLink 改造成 skill + MCP 系统，可以用三层状态。</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Query Understanding</h3>
+          <p>把用户问题拆成指标、维度、过滤、时间、排序、输出格式。这里不直接写 SQL，而是形成候选查询意图。</p>
+        </div>
+        <div class="card">
+          <h3>Schema Grounding</h3>
+          <p>调用 schema 检索、数据库探查、join path 检查，把自然语言概念落到 table.column。</p>
+        </div>
+        <div class="card">
+          <h3>Execution Planning</h3>
+          <p>确认字段足够后，再生成 SQL 或 MCP 查询行为，并通过 dry-run / LIMIT query 做最后验证。</p>
+        </div>
+      </div>
+      <pre class="code">recommended MCP tools:
+- retrieve_schema(query, top_k, exclude_columns)
+- explore_schema(sql_probe)
+- inspect_table(table_name)
+- sample_column(table, column, limit)
+- verify_query(draft_sql, mode="dry_run|limit")
+- commit_schema(table_columns, reasons)</pre>
+      <div class="warn">
+        对工程落地来说，AutoLink 最值得借鉴的是“让模型决定下一步查什么”，但真实系统里必须给 MCP tool 加权限、SQL 白名单、超时、行数限制和审计日志。否则探索型 agent 很容易把数据库问得太宽。
+      </div>
+    </div>
+  </section>
+
+  <section id="critique">
+    <div class="wrap">
+      <div class="section-kicker">Reviewer-style critique</div>
+      <h2>这篇论文强在工程形态，但还有几个要留心的边界。</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>优点</h3>
+          <p>问题定义贴近真实数据库：不是追求“字段越少越好”，而是追求高 strict recall 与可控 token。action space 清晰，天然适合 tool calling / MCP。</p>
+        </div>
+        <div class="card">
+          <h3>风险</h3>
+          <p>它依赖 schema 向量库质量、字段描述和样例值。企业库如果字段名缩写严重、注释缺失、权限受限，retrieval 和 exploration 都会变难。</p>
+        </div>
+        <div class="card">
+          <h3>实验局限</h3>
+          <p>SQL generation 不是本文核心，后处理使用了 self-consistency、syntactic correction 和 voting。你落地时要单独评估 SQL 生成器和 schema linker 的贡献。</p>
+        </div>
+        <div class="card">
+          <h3>可扩展点</h3>
+          <p>可以把 \(S_{linked}\) 扩展成 typed IR：字段、指标、维度、过滤、join path、权限标签、置信度、验证记录。这样更适合智能问询产品。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p><strong>本页面基于：</strong> Wang et al., “AutoLink: Autonomous Schema Exploration and Expansion for Scalable Schema Linking in Text-to-SQL at Scale,” AAAI 2026.</p>
+      <p>本地 PDF：<a href="/papers/autolink/AutoLink_AAAI2026.pdf">AutoLink_AAAI2026.pdf</a> · 官方下载页：<a target="_blank" rel="noopener" href="https://ojs.aaai.org/index.php/AAAI/article/view/40672">AAAI OpenReview/OJS 页面</a> · 代码仓库：<a target="_blank" rel="noopener" href="https://github.com/wzy416/AutoLink">github.com/wzy416/AutoLink</a></p>
+      <p>说明：MathJax 公式渲染依赖 CDN；离线打开时正文和图片正常显示，公式可能退化为原始 LaTeX。</p>
+    </div>
+  </footer>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/05/27/PaperReadings/autolink/">http://nanamiakari.github.io/2026/05/27/PaperReadings/autolink/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/Schema-Linking/">Schema Linking</a><a class="post-meta__tags" href="/tags/Text-to-SQL/">Text-to-SQL</a><a class="post-meta__tags" href="/tags/Agent/">Agent</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/" title="In-depth Analysis of LLM-based Schema Linking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">In-depth Analysis of LLM-based Schema Linking</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/21/DataEngine/deepseek-generated-dictionary-experiment-report/" title="DeepSeek 生成全量字典与混合方案实验报告"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">DeepSeek 生成全量字典与混合方案实验报告</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/" title="In-depth Analysis of LLM-based Schema Linking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="title">In-depth Analysis of LLM-based Schema Linking</div></div></a></div><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/07/PaperReadings/real-time-trustworthiness-scoring/" title="CONSTRUCT: 结构化输出的实时可信度评分"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">CONSTRUCT: 结构化输出的实时可信度评分</div></div></a></div><div><a href="/2026/05/13/PaperReadings/schema-minerpro/" title="SCHEMA-MINERpro: 让机器读懂科学实验流程"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">SCHEMA-MINERpro: 让机器读懂科学实验流程</div></div></a></div><div><a href="/2026/05/07/PaperReadings/llmstructbench/" title="LLMStructBench: 结构化数据抽取基准"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-07</div><div class="title">LLMStructBench: 结构化数据抽取基准</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">20</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">26</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/" title="In-depth Analysis of LLM-based Schema Linking">In-depth Analysis of LLM-based Schema Linking</a><time datetime="2026-05-27T06:58:59.000Z" title="发表于 2026-05-27 14:58:59">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/PaperReadings/autolink/" title="AutoLink: Agentic Schema Linking for Text-to-SQL">AutoLink: Agentic Schema Linking for Text-to-SQL</a><time datetime="2026-05-27T05:50:43.000Z" title="发表于 2026-05-27 13:50:43">2026-05-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/21/DataEngine/deepseek-generated-dictionary-experiment-report/" title="DeepSeek 生成全量字典与混合方案实验报告">DeepSeek 生成全量字典与混合方案实验报告</a><time datetime="2026-05-21T11:40:00.000Z" title="发表于 2026-05-21 19:40:00">2026-05-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/21/DataEngine/deepseek-llm-dictionary-full-report/" title="DeepSeek 辅助标准字典全量实验报告">DeepSeek 辅助标准字典全量实验报告</a><time datetime="2026-05-21T11:05:00.000Z" title="发表于 2026-05-21 19:05:00">2026-05-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/20/DataEngine/data-platform-standard-dictionary-experiment/" title="数据中台架构与标准字典实验说明">数据中台架构与标准字典实验说明</a><time datetime="2026-05-20T09:10:00.000Z" title="发表于 2026-05-20 17:10:00">2026-05-20</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

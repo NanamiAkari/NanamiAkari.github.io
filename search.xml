@@ -4,6 +4,76 @@
   
     
     <entry>
+      <title>In-depth Analysis of LLM-based Schema Linking</title>
+      <link href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/"/>
+      <url>/2026/05/27/PaperReadings/llm-schema-linking-analysis/</url>
+      
+        
+        <content type="html"><![CDATA[EDBT 2026 · Experiments & Analyses · Schema Linking LLM 做 Schema Linking，到底该怎么做？ 这篇论文不是提出一个复杂新模型，而是把 LLM-based schema linking 的关键做法逐项拆开实验：few-shot、question decomposition、fine-tuning、refinement rules、schema enrichment。对智能问询项目很实用。 论文：In-depth Analysis of LLM-based Schema Linking 出处：EDBT 2026 数据集：Spider + BIRD 代码：IBM/few-shot-schema-linking 核心结论 Pipeline Refinement 实验结果 Schema Enrichment 项目落地 评价 Thesis 这篇论文最重要的判断：schema linking 的 recall 比 precision 更要命。 如果漏掉了 SQL 必需的表或列，后面的 Text-to-SQL 基本没有机会生成正确查询；如果多给了一些无关字段，模型还有可能绕过去。所以论文采用更严格的 recall：只有一个样本所需列全部命中，才算 recall 成功。 92.04% BIRD best recall Codestral-22B few-shot + question decomposition 在 BIRD 上达到最高 schema linking recall。 97.48% Spider best few-shot recall DeepSeek-Coder-33B few-shot 在 Spider 上的 recall 很高，说明不一定需要超大模型。 +26.33% Refinement recall boost 在 BIRD 上，规则化 refinement 平均把 recall 从 43.07 提升到 69.40。 论文 Figure 1：schema linking 的任务示例。蓝色列和红色表是生成 SQL 所需元素。 Pipeline 统一 pipeline：让 LLM 输出 JSON，再做数据库知识修正。 作者没有把 schema linking 当作“让模型自由解释”的任务，而是要求模型输出可解析的 JSON：`tables` 和 `columns`。输入包括任务说明、DB schema、自然语言问题、hint/evidence，以及从数据库值里 BM25 匹配到的 matched values。 1 Prompt 说明只做 schema linking，不生成 SQL。 2 Schema 提供表、列、类型、主外键、样例值或描述。 3 NLQ + Hint 问题本身，以及 BIRD 中的 domain evidence。 4 Matched Values 从库值中找和问题词面相似的值，辅助字段定位。 5 JSON + Refinement 解析输出，并补上表归属、外键连接等数据库逻辑。 论文 Figure 2：few-shot schema linking pipeline。它非常适合改造成 MCP 工具链。 { "tables": ["patient", "laboratory"], "columns": [ "patient.diagnosis", "patient.id", "laboratory.id", "laboratory.wbc" ] } Database intelligence LLM 会懂语义，但经常忽略关系数据库的结构规则。 这篇论文很实用的一点，是把 LLM 输出后的修正规则讲清楚。它们不是复杂模型，却能明显提高 recall，尤其是 foreign key columns 和 junction tables。 Refinement 解决什么问题 对工程实现的启发 Approximate String Matching 模型生成拼写错误或近似列名。 用 RapidFuzz 或编辑距离把幻觉字段映射到真实字段，但要设阈值。 Table Membership 预测了 column，却漏掉所属 table。 任何 `table.column` 都自动补充 table 到 linked schema。 Foreign Key Path 漏掉多对多中间表或连接路径。 用 schema graph 找 predicted tables 之间的最短 FK 路径，补 junction tables。 FK Connection 预测了表，但漏掉 join 所需外键列。 一旦两个表需要 join，自动补主键/外键列，减少 SQL 生成失败。 论文 Figure 3：模型预测了 author/book/genre，但还要补 book_author 才能 join。 论文 Table 4：FK Connections 是影响最大的 refinement 步骤。 Question decomposition 拆问题通常提升 recall，但会降低 precision。 复杂问题经常在一句话里混合多个条件、指标和实体。论文发现 question decomposition 能让模型更容易覆盖所有字段，但因为会合并多个子问题的 schema linking 结果，所以也会带来更多噪声。 论文 Figure 4：把复杂问题拆成多个不可再拆的子问题，然后对每个子问题分别做 schema linking。 对智能问询系统来说，这意味着我们可以把“提高召回”和“控制噪声”拆开做：先用 decomposition 尽量找全，再用 refinement、权限、字段类型、SQL dry-run 去收敛。 Results 实验把几个关键取舍讲得很清楚。 设置 Spider Precision Spider Recall BIRD Precision BIRD Recall 结论 Codestral-22B Few-shot 72.37 97.29 67.93 86.11 强 few-shot 基线。 Codestral-22B Few-shot + QD 56.23 96.51 45.35 92.04 BIRD recall 最强，但噪声增加。 DeepSeek-Coder-6.7B SFT 81.64 93.32 79.79 75.03 fine-tuning 提升 precision。 DeepSeek-Coder-6.7B SFT + QD 67.03 96.42 66.02 84.09 更平衡，适合产品化。 Prel-SQL DeepSeek-33B 76.59 91.48 81.67 59.51 精度高但 recall 不稳。 Takeaway 1 大模型通常更好，但小型 code-oriented specialist model 很有竞争力，尤其 fine-tune 后。 Takeaway 2 Question Decomposition 提高 recall、降低 precision；SFT 提高 precision、降低 recall；两者结合更平衡。 Takeaway 3 schema linking 越好，Text-to-SQL 通常越好，其中 recall 的影响明显大于 precision。 Takeaway 7 多采样输出并取 union 可以提高 recall，但会降低 precision，适合在高召回模式中使用。 论文 Table 2：Spider 与 BIRD 上不同模型和设置的 schema linking precision/recall。 论文 Figure 7：schema linking 与 Text-to-SQL execution accuracy 的关系，recall 的影响更突出。 论文 Figure 10/11：few-shot demonstrations 和多采样输出对 precision/recall 的影响。 Schema enrichment 它还挑战了一个常见假设：oracle schema 不一定最优。 传统 schema linking oracle 只包含 SQL 必需的最小字段。但作者发现，适当加入额外字段可以帮助 LLM 理解表的整体语义，部分模型的 Text-to-SQL 结果会超过最小 oracle。 $$S_{enriched} = S_{oracle} \cup S_{context}$$ 这里的 \(S_{context}\) 不是随便加列，而是按 diversity 或 representativeness 选择能代表表语义的字段。 Diversity 从 column embedding 空间里找和已选字段语义距离较远的列，让表表示覆盖更多概念。 Representation 用采样或聚类选出能代表表结构的典型列，让模型更容易理解这个表是什么。 论文 Table 3：schema enrichment 对 oracle 和预测 schema links 的影响，不同 SQL 生成模型受益不同。 For DataEngine 这篇论文可以直接转成你的 skill + MCP 查询前处理层。 和 AutoLink 相比，这篇更像“schema linking 工程手册”。它告诉我们：不要只依赖 LLM 一次性输出字段，要给输出加结构化约束、数据库规则修正、复杂问题拆解和可控 enrichment。 recommended pipeline: 1. parse_question_intent(question) 2. decompose_question(question) # optional, high-recall mode 3. link_schema_json(question, schema_context) 4. normalize_schema_names(predictions) # fuzzy matching 5. complete_table_membership(predictions) 6. complete_fk_paths(predictions, schema_graph) 7. add_fk_connection_columns(predictions) 8. enrich_schema_context(predictions) # optional, model-dependent 9. verify_query_plan_or_draft_sql(predictions) 10. generate_sql_or_mcp_query_action() 模块 建议 MCP/Skill 能力 原因 结构化输出 `link_schema(question) -> JSON` 避免自然语言输出难解析。 值匹配 `search_values(query_terms)` 把问题里的实体值映射到具体列。 Schema Graph `find_join_path(tables)` 补中间表和外键列。 Refinement `normalize_columns(predicted_columns)` 修正拼写、别名、近似列名。 验证 `dry_run_query(draft_sql)` 在生成最终答案前发现缺字段或 join 错误。 一个务实建议：默认模式用 fine-tuned 或 strict few-shot 保持 precision；当用户问题复杂、字段不确定或 SQL dry-run 失败时，再打开 decomposition + multi-sampling 的高召回模式。 Reviewer-style critique 这篇论文的价值在于清晰实验，不在于炫技。 强项 统一 pipeline 公平比较多种 LLM、few-shot、SFT、QD 和 refinement；并明确展示 schema linking 如何影响 Text-to-SQL。 工程价值 它把很多“系统里该有但论文常省略”的细节讲出来：JSON 解析、fuzzy matching、表归属、FK 路径、样例值匹配。 局限 它还是基于 Spider/BIRD 做实验，真实企业库里的注释缺失、权限、脏字段名、业务口径冲突会更复杂。 和 AutoLink 的关系 AutoLink 更偏 agentic exploration；这篇更偏 schema linking 组件分析。两者结合，正好形成可落地方案。 本页面基于： George Katsogiannis-Meimarakis et al., “In-depth Analysis of LLM-based Schema Linking,” EDBT 2026. 本地 PDF： In_depth_Analysis_LLM_based_Schema_Linking_EDBT2026.pdf · 官方 PDF： openproceedings.org/2026/conf/edbt/paper-24.pdf · 代码： github.com/IBM/few-shot-schema-linking 说明：页面图片已内嵌；MathJax 公式渲染依赖 CDN，离线时公式可能显示为原始 LaTeX。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> LLM </tag>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 论文解读 </tag>
+            
+            <tag> Schema Linking </tag>
+            
+            <tag> Text-to-SQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>AutoLink: Agentic Schema Linking for Text-to-SQL</title>
+      <link href="/2026/05/27/PaperReadings/autolink/"/>
+      <url>/2026/05/27/PaperReadings/autolink/</url>
+      
+        
+        <content type="html"><![CDATA[AAAI 2026 · Text-to-SQL · Schema Linking AutoLink：让智能问询自己找字段 这篇论文把 schema linking 从“一次性把全库 schema 塞给 LLM”改造成“agent 逐步探索、检索、验证、扩展字段”的过程。对 skill + MCP 连接数据库的智能问询系统，参考价值非常直接。 论文：AutoLink 场景：大规模数据库 Text-to-SQL 核心：schema exploration + vector search + verification 代码：github.com/wzy416/AutoLink 核心想法 解决什么 方法拆解 Action Space 实验结果 对 MCP 项目的启发 审稿式评价 One sentence AutoLink 的关键不是写 SQL，而是先把“该用哪些字段”找全。 在真实业务库里，表和列可能非常多。把所有 schema 都交给 LLM 会带来两个问题：上下文太长，以及无关字段太多。AutoLink 的做法是：先给模型少量候选字段和全表名，再让模型像数据库工程师一样，通过检索、探查、试跑 SQL 来逐步补齐必要 schema。 97.4% Bird-Dev strict schema linking recall 论文报告 AutoLink 在 Bird-Dev 上达到 97.4% SRR，同时 SQL 执行准确率为 68.71%。 91.2% Spider 2.0-Lite strict recall Spider 2.0-Lite 更接近企业级数据库，平均列数超过 800，AutoLink 在这里的优势尤其明显。 21.2K Spider 2.0-Lite schema linking avg tokens 相比部分 full-schema 方法动辄 160K+ tokens，AutoLink 通过迭代扩展显著降低上下文成本。 Motivation 传统 schema linking 在大库里容易卡在三个地方。 上下文限制 数据库级方法常把完整 schema 和问题一起塞进 LLM。小库可行，大库会触发上下文窗口、费用和噪声问题。 逐字段打分太贵 element-level 方法会对每个 table/column 打分，复杂度接近 \(O(|S|)\)。schema 越大，延迟和成本越难控。 召回和噪声冲突 为了不漏字段，检索器通常返回很多候选；候选越多，SQL 生成阶段又越容易被无关字段干扰。 $$S_{linked} \subset S_{full}$$ AutoLink 的目标不是压到最少字段，而是在 token 可控的前提下，尽量保证 \(S_{linked}\) 包含回答问题所需的所有 gold schema elements。 Method 它把字段识别变成了一个 agent 的多轮决策问题。 AutoLink 不要求 agent 看到完整列清单。它只暴露两个外部环境：真实数据库环境 \(E_{DB}\) 和 schema vector store 环境 \(E_{VS}\)。模型每轮输出 reasoning trace 和 actions，环境执行后返回 observation，直到模型认为 schema 足够完整。 1 初始检索 用原始问题从向量库取 top-n 字段，形成初始 \(S_{linked}^{(0)}\)。 2 表名上下文 给 agent 全部表名，但不给全部字段，降低上下文噪声。 3 语义检索 当发现缺字段时，用更具体的自然语言查询调用 vector store。 4 SQL 探查 通过小 SQL 查元数据、样例值、外键或字段名模式。 5 验证停止 尝试 draft SQL，如果能执行且 schema 充分，就结束。 论文 Figure 1：AutoLink 的整体流程，核心是 agent 在 Database Env 与 Vector Store Env 之间循环交互。 Action space 五个动作，刚好可以映射成 MCP tools。 动作 是否有环境反馈 论文里的作用 在你的项目里可以怎么落地 @explore_schema 有 执行探索型 SQL，查字段、元数据、样例值、主外键，不直接回答问题。 MCP tool：只允许白名单 SQL，如 information_schema、PRAGMA、LIMIT sample。 @retrieve_schema 有 用自然语言概念从 schema vector store 检索缺失字段。 MCP tool：输入 query、top_k、exclude_columns，返回 table/column/type/comment/sample。 @verify_schema 有 尝试执行一条 draft SQL，判断当前 schema 是否足够。 MCP tool：dry-run 或 LIMIT 5 执行，返回错误、空结果、列不存在、类型问题。 @add_schema 无 把新发现的字段显式加入 \(S_{linked}\)。 内部状态更新：维护 confirmed fields、candidate fields、reason。 @stop_action 无 schema 足够完整或达到最大轮数时终止。 终止条件：字段覆盖、SQL 可执行、预算上限、风险检查通过。 $$S_{linked} \leftarrow S_{linked} \cup S_{added}$$ 这一步很适合做成结构化状态，而不是让模型在上下文里“隐式记住”。 { "question": "列出 2024 年销售额最高的客户及所属区域", "linked_schema": [ {"table": "orders", "column": "order_date", "reason": "时间过滤"}, {"table": "orders", "column": "amount", "reason": "销售额指标"}, {"table": "customers", "column": "customer_name", "reason": "输出字段"}, {"table": "regions", "column": "region_name", "reason": "维度字段"} ], "next_action": { "tool": "verify_schema", "args": {"draft_sql": "SELECT ... LIMIT 5"} } } Experiments 实验重点：大 schema 下，AutoLink 召回掉得更慢。 论文在 Bird-Dev 和 Spider 2.0-Lite 上评估。Bird-Dev 平均每库约 80 列；Spider 2.0-Lite 来自更真实的企业级场景，平均超过 800 列，包含 BigQuery、Snowflake、SQLite 多方言。 方法 Bird SRR Bird Avg Columns Bird Avg Tokens Spider SRR all Spider Avg Columns Spider Avg Tokens DE-SL (BGE-Large) 35.5 35.7 - 43.6 153.8 - CE-SL (BGE-reranker) 72.4 35.7 - 57.6 153.8 - MCS-SQL 85.7 7.5 29.8K 58.9 45.1 168.9K SQL-to-Schema 92.5 13.5 19.4K 64.0 49.0 171.9K RSL-SQL 93.3 13.0 14.8K 52.0 25.8 29.2K LinkAlign - - - 36.4 21.1 66.7K AutoLink 97.4 35.8 8.0K 91.2 159.4 21.2K SQL 执行准确率 Spider 2.0-Lite 上，AutoLink + DeepSeek-R1 达到 34.92% EX，接近 ReFoRCE + GPT-o3 的 37.84%，但平均 token 约 38.0K，明显少于 ReFoRCE 的 81.1K。 消融实验 去掉 @retrieve_schema 的影响最大；去掉 @explore_schema 和 @verify_schema 也会降低 SRR。这说明它的优势来自“检索 + 探索 + 验证”的组合，而不是单个提示词技巧。 论文 Table 1：Schema linking 对比结果。上方 HTML 表格已摘取关键列，图片保留原表上下文。 论文 Table 2/3/4：SQL 执行准确率与 action ablation。 论文 Figure 2/3：不同数据库规模与不同 initial top-n 下的 SRR、token 和 EX 变化。 For your project 把 AutoLink 改造成 skill + MCP 系统，可以用三层状态。 Query Understanding 把用户问题拆成指标、维度、过滤、时间、排序、输出格式。这里不直接写 SQL，而是形成候选查询意图。 Schema Grounding 调用 schema 检索、数据库探查、join path 检查，把自然语言概念落到 table.column。 Execution Planning 确认字段足够后，再生成 SQL 或 MCP 查询行为，并通过 dry-run / LIMIT query 做最后验证。 recommended MCP tools: - retrieve_schema(query, top_k, exclude_columns) - explore_schema(sql_probe) - inspect_table(table_name) - sample_column(table, column, limit) - verify_query(draft_sql, mode="dry_run|limit") - commit_schema(table_columns, reasons) 对工程落地来说，AutoLink 最值得借鉴的是“让模型决定下一步查什么”，但真实系统里必须给 MCP tool 加权限、SQL 白名单、超时、行数限制和审计日志。否则探索型 agent 很容易把数据库问得太宽。 Reviewer-style critique 这篇论文强在工程形态，但还有几个要留心的边界。 优点 问题定义贴近真实数据库：不是追求“字段越少越好”，而是追求高 strict recall 与可控 token。action space 清晰，天然适合 tool calling / MCP。 风险 它依赖 schema 向量库质量、字段描述和样例值。企业库如果字段名缩写严重、注释缺失、权限受限，retrieval 和 exploration 都会变难。 实验局限 SQL generation 不是本文核心，后处理使用了 self-consistency、syntactic correction 和 voting。你落地时要单独评估 SQL 生成器和 schema linker 的贡献。 可扩展点 可以把 \(S_{linked}\) 扩展成 typed IR：字段、指标、维度、过滤、join path、权限标签、置信度、验证记录。这样更适合智能问询产品。 本页面基于： Wang et al., “AutoLink: Autonomous Schema Exploration and Expansion for Scalable Schema Linking in Text-to-SQL at Scale,” AAAI 2026. 本地 PDF： AutoLink_AAAI2026.pdf · 官方下载页： AAAI OpenReview/OJS 页面 · 代码仓库： github.com/wzy416/AutoLink 说明：MathJax 公式渲染依赖 CDN；离线打开时正文和图片正常显示，公式可能退化为原始 LaTeX。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 论文解读 </tag>
+            
+            <tag> Schema Linking </tag>
+            
+            <tag> Text-to-SQL </tag>
+            
+            <tag> Agent </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>DeepSeek 生成全量字典与混合方案实验报告</title>
       <link href="/2026/05/21/DataEngine/deepseek-generated-dictionary-experiment-report/"/>
       <url>/2026/05/21/DataEngine/deepseek-generated-dictionary-experiment-report/</url>
@@ -26,11 +96,11 @@
             
             <tag> 标准字典 </tag>
             
-            <tag> DeepSeek </tag>
-            
             <tag> 数据治理 </tag>
             
             <tag> DataEngine </tag>
+            
+            <tag> DeepSeek </tag>
             
             <tag> 实验 </tag>
             
@@ -63,11 +133,11 @@
             
             <tag> 标准字典 </tag>
             
-            <tag> DeepSeek </tag>
-            
             <tag> 数据治理 </tag>
             
             <tag> DataEngine </tag>
+            
+            <tag> DeepSeek </tag>
             
             <tag> 实验 </tag>
             
@@ -98,13 +168,13 @@
             
             <tag> 数据中台 </tag>
             
+            <tag> 元数据 </tag>
+            
             <tag> 标准字典 </tag>
             
             <tag> 数据治理 </tag>
             
             <tag> DataEngine </tag>
-            
-            <tag> 元数据 </tag>
             
         </tags>
       
@@ -382,9 +452,9 @@
             
             <tag> 大模型 </tag>
             
-            <tag> LLM </tag>
-            
             <tag> 智能体 </tag>
+            
+            <tag> LLM </tag>
             
             <tag> Coze </tag>
             
@@ -409,9 +479,9 @@
             
             <tag> 大模型 </tag>
             
-            <tag> LLM </tag>
-            
             <tag> 智能体 </tag>
+            
+            <tag> LLM </tag>
             
             <tag> Coze </tag>
             
