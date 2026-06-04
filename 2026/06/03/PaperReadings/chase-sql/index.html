@@ -1,0 +1,793 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>CHASE-SQL：别只生成一个 SQL | 灯推的恬静小屋</title><meta name="author" content="Akari"><meta name="copyright" content="Akari"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="ICLR 2025 · Text-to-SQL · Test-time compute       CHASE-SQL：别只生成一个 SQL       这篇论文的核心很直观：复杂数据库问题里，LLM 第一次写出的 SQL 不一定最好。CHASE-SQL 让模型从多条思路生成候选 SQL，再用训练过的选择器两两比较，挑出最可能正确的一条。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CHASE-SQL：别只生成一个 SQL">
+<meta property="og:url" content="http://nanamiakari.github.io/2026/06/03/PaperReadings/chase-sql/index.html">
+<meta property="og:site_name" content="灯推的恬静小屋">
+<meta property="og:description" content="ICLR 2025 · Text-to-SQL · Test-time compute       CHASE-SQL：别只生成一个 SQL       这篇论文的核心很直观：复杂数据库问题里，LLM 第一次写出的 SQL 不一定最好。CHASE-SQL 让模型从多条思路生成候选 SQL，再用训练过的选择器两两比较，挑出最可能正确的一条。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://nanamiakari.github.io/img/pro.jpg">
+<meta property="article:published_time" content="2026-06-03T08:51:10.000Z">
+<meta property="article:modified_time" content="2026-06-04T11:40:25.632Z">
+<meta property="article:author" content="Akari">
+<meta property="article:tag" content="LLM">
+<meta property="article:tag" content="DataEngine">
+<meta property="article:tag" content="论文解读">
+<meta property="article:tag" content="Text-to-SQL">
+<meta property="article:tag" content="SQL">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://nanamiakari.github.io/img/pro.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="http://nanamiakari.github.io/2026/06/03/PaperReadings/chase-sql/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//hm.baidu.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?db5273f782963382045b16816d604bed";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: {"path":"/search.xml","preload":false,"top_n_per_article":2,"unescape":true,"languages":{"hits_empty":"找不到您查询的内容：${query}","hits_stats":"共找到 ${hits} 篇文章"}},
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":365,"position":"top","messagePrev":"本文最后更新于","messageNext":"天前，部分技术内容可能已经变化，请结合最新文档阅读。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '天',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体中文","cht_to_chs":"你已切换为简体中文","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#1f1f1f","position":"top-center"},
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'CHASE-SQL：别只生成一个 SQL',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: false,
+  postUpdate: '2026-06-04 19:40:25'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/custom.css"><link rel="stylesheet" href="/css/paper-inline.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">24</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><nav id="nav"><span id="blog-info"><a href="/" title="灯推的恬静小屋"><img class="site-icon" src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/logo.png"/><span class="site-name">灯推的恬静小屋</span></a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search" href="javascript:void(0);"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">CHASE-SQL：别只生成一个 SQL</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-06-03T08:51:10.000Z" title="发表于 2026-06-03 16:51:10">2026-06-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-06-04T11:40:25.632Z" title="更新于 2026-06-04 19:40:25">2026-06-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%95%B0%E6%8D%AE%E5%B7%A5%E7%A8%8B/">数据工程</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="CHASE-SQL：别只生成一个 SQL"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><div class="paper-article-inline paper-article-chase-sql">
+<header>
+    <div class="hero">
+      <div class="eyebrow">ICLR 2025 · Text-to-SQL · Test-time compute</div>
+      <h1>CHASE-SQL：别只生成一个 SQL</h1>
+      <p class="subtitle">这篇论文的核心很直观：复杂数据库问题里，LLM 第一次写出的 SQL 不一定最好。CHASE-SQL 让模型从多条思路生成候选 SQL，再用训练过的选择器两两比较，挑出最可能正确的一条。</p>
+      <div class="hero-meta">
+        <span class="pill">论文：CHASE-SQL</span>
+        <span class="pill">出处：ICLR 2025</span>
+        <span class="pill">关键词：multi-path reasoning</span>
+        <span class="pill">关键词：preference optimized selection</span>
+      </div>
+    </div>
+  </header>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="#idea">做了什么</a>
+      <a href="#why">为什么有效</a>
+      <a href="#pipeline">框架流程</a>
+      <a href="#generators">三条生成路径</a>
+      <a href="#selector">选择器</a>
+      <a href="#experiments">实验结果</a>
+      <a href="#mcp">项目落地</a>
+      <a href="#critique">评价</a>
+    </div>
+  </nav>
+
+  <section id="idea">
+    <div class="wrap">
+      <div class="kicker">What it does</div>
+      <h2>CHASE-SQL 做的不是“更会写一次 SQL”，而是“多写几种，再认真挑”。</h2>
+      <p class="lead">传统 Text-to-SQL 常常让 LLM 生成一条 SQL，或者采样多条后用 self-consistency 选出现次数最多的执行结果。CHASE-SQL 认为这不够：最常见的答案不一定正确，尤其是复杂查询里，少数候选反而可能是对的。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>多路径生成</h3>
+          <p>用三种不同策略生成候选 SQL：Divide-and-Conquer CoT、Query Plan CoT、Online Synthetic Examples。</p>
+        </div>
+        <div class="card">
+          <h3>修复候选</h3>
+          <p>对语法错误、空结果等候选 SQL 做 LLM-based query fixer，最多迭代修复三次。</p>
+        </div>
+        <div class="card">
+          <h3>偏好选择</h3>
+          <p>不用简单多数投票，而是训练 binary selection model，两两比较候选 SQL，累计得分最高者胜出。</p>
+        </div>
+      </div>
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-01.png" alt="CHASE-SQL framework overview" />
+        <div class="caption">论文 Figure 1：CHASE-SQL 总体框架，包含 value retrieval、candidate generation、query fixer 和 selection agent。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why" class="band">
+    <div class="wrap">
+      <div class="kicker">Motivation</div>
+      <h2>为什么不能只用 self-consistency？因为“多数一致”不等于“正确”。</h2>
+      <p class="lead">论文在 BIRD dev 上展示：单条生成是 63.01% EX，self-consistency 提到 68.84%，但如果能从候选池里总是选中正确 SQL，上界能到 82.79%。这个巨大差距说明：候选池里常常已经有正确答案，真正难的是把它挑出来。</p>
+      <div class="grid">
+        <div class="card">
+          <div class="metric">63.01%</div>
+          <div class="metric-label">Single query EX</div>
+          <p>只生成一条 SQL 的基线。</p>
+        </div>
+        <div class="card">
+          <div class="metric">68.84%</div>
+          <div class="metric-label">Self-consistency EX</div>
+          <p>按执行结果聚类，选择最大簇。</p>
+        </div>
+        <div class="card">
+          <div class="metric">82.79%</div>
+          <div class="metric-label">Candidate pool upper bound</div>
+          <p>如果选择器足够强，理论提升空间很大。</p>
+        </div>
+      </div>
+      <div class="figure">
+        <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-02.png" alt="Self-consistency upper-bound table" />
+        <div class="caption">论文 Table 1：self-consistency 与 oracle upper bound 的差距，是 CHASE-SQL 设计选择器的动机。</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pipeline">
+    <div class="wrap">
+      <div class="kicker">Pipeline</div>
+      <h2>完整流程可以看成四步：找值、生成、修复、选择。</h2>
+      <div class="flow">
+        <div class="step">
+          <div>
+            <span class="num">1</span>
+            <h3>Value retrieval</h3>
+            <p>先从问题里抽关键词，再用 LSH、embedding similarity 和 edit distance 找数据库中的相关值。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">2</span>
+            <h3>Candidate generators</h3>
+            <p>三条不同推理路径生成候选 SQL，增加“至少有一条正确”的概率。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">3</span>
+            <h3>Query fixer</h3>
+            <p>用错误信息、空结果等反馈反思并修复候选 SQL。</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <span class="num">4</span>
+            <h3>Selection agent</h3>
+            <p>训练过的选择器两两比较候选，最终选累计得分最高的 SQL。</p>
+          </div>
+        </div>
+      </div>
+      <pre class="code">CHASE-SQL(question, database):
+  values = retrieve_values(question, database)
+  candidates = []
+  candidates += divide_and_conquer_cot(question, schema, values)
+  candidates += query_plan_cot(question, schema, values)
+  candidates += online_synthetic_examples(question, schema, values)
+  fixed = query_fixer(candidates)
+  final_sql = pairwise_selection_agent(fixed)
+  return final_sql</pre>
+    </div>
+  </section>
+
+  <section id="generators" class="warm">
+    <div class="wrap">
+      <div class="kicker">Candidate generation</div>
+      <h2>三条生成路径各有擅长，不是简单重复采样。</h2>
+      <p class="lead">CHASE-SQL 的关键不是“同一个 prompt 多采几次”，而是从不同思考方式出发，让候选 SQL 真正多样化，同时保持质量。</p>
+      <div class="grid">
+        <div class="card">
+          <h3>1. Divide-and-Conquer CoT</h3>
+          <p>先把复杂问题拆成子问题，为每个子问题生成 partial SQL，再 assemble 成最终 SQL，并做优化。</p>
+          <p><strong>适合：</strong>嵌套查询、复杂 WHERE/HAVING、多步骤数学计算。</p>
+        </div>
+        <div class="card">
+          <h3>2. Query Plan CoT</h3>
+          <p>让推理过程模仿数据库执行计划：先找相关表，再说明 join/filter/count/match，最后选择返回列。</p>
+          <p><strong>适合：</strong>需要理解表关系、join 路径和过滤操作的问题。</p>
+        </div>
+        <div class="card">
+          <h3>3. Online Synthetic Examples</h3>
+          <p>针对当前问题和数据库，在线生成大量 question-SQL 示例，作为 many-shot context 帮模型理解 schema 和 SQL 结构。</p>
+          <p><strong>适合：</strong>为当前数据库补充定制 few-shot 示例，提升候选多样性。</p>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-03.png" alt="Candidate generator ablation table" />
+          <div class="caption">论文 Table 4：单个候选生成器与 query fixer 的效果对比。</div>
+        </div>
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-04.png" alt="Generator diversity analysis" />
+          <div class="caption">论文 Figure 3：三种生成器能解决不同样本，说明它们提供了真实互补性。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="selector">
+    <div class="wrap">
+      <div class="kicker">Preference optimized selection</div>
+      <h2>选择器不是排序所有候选，而是两两比较。</h2>
+      <p class="lead">如果一次让模型比较很多候选，它很难稳定判断。CHASE-SQL 把问题改成二分类：给定用户问题、两个候选 SQL 和它们使用的 schema union，让模型判断哪个更可能正确。所有候选两两比较后，累计分最高的 SQL 被选中。</p>
+      <div class="formula">
+        $$c_f = \arg\max_{c_i \in C} r_i$$
+        <p>其中 \(r_i\) 是候选 SQL 在两两比较中累计赢得的分数。</p>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>选择方式</th>
+            <th>直观含义</th>
+            <th>论文观察</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Self-consistency</td><td>选执行结果最多的一簇。</td><td>比单条生成好，但会被“多数错答案”误导。</td></tr>
+          <tr><td>Ranker agent</td><td>一次性把所有候选给模型排序。</td><td>不如 binary selection，候选太相似时更难判断。</td></tr>
+          <tr><td>Binary selection agent</td><td>两两比较候选并累计得分。</td><td>CHASE-SQL 的核心优势，显著超过 self-consistency。</td></tr>
+        </tbody>
+      </table>
+      <div class="grid two">
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-05.png" alt="Selection model binary accuracy" />
+          <div class="caption">论文 Table 5：fine-tuned selection models 的二分类选择准确率更高。</div>
+        </div>
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-06.png" alt="Selection method comparison" />
+          <div class="caption">论文 Table 6：selection agent 在不同候选生成方法和温度下都明显强于 self-consistency。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experiments" class="band">
+    <div class="wrap">
+      <div class="kicker">Results</div>
+      <h2>实验结果：BIRD 上达到 73.0%，Spider 上无需专门调参也有强泛化。</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="metric">73.0%</div>
+          <div class="metric-label">BIRD test EX</div>
+          <p>论文报告 CHASE-SQL + Gemini 1.5 Pro 在 BIRD test 上达到 73.0%。</p>
+        </div>
+        <div class="card">
+          <div class="metric">73.01%</div>
+          <div class="metric-label">BIRD dev EX</div>
+          <p>dev 上也达到 73.01%，论文提交时位居 BIRD leaderboard 顶部。</p>
+        </div>
+        <div class="card">
+          <div class="metric">87.6%</div>
+          <div class="metric-label">Spider test EX</div>
+          <p>没有使用 Spider 分布专门训练选择器或改 few-shot，仍有很强结果。</p>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>组件移除</th>
+            <th>BIRD dev EX</th>
+            <th>下降</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>CHASE-SQL All</td><td class="highlight">73.01</td><td>-</td><td>完整系统。</td></tr>
+          <tr><td>with self-consistency</td><td>68.84</td><td>-4.17</td><td>多数投票明显不如选择器。</td></tr>
+          <tr><td>with ranker agent</td><td>65.51</td><td>-7.50</td><td>一次性排序不如两两比较。</td></tr>
+          <tr><td>without LSH</td><td>70.09</td><td>-2.92</td><td>值检索很重要。</td></tr>
+          <tr><td>without Query Fixer</td><td>69.23</td><td>-3.78</td><td>修复循环贡献明显。</td></tr>
+          <tr><td>without DC / OS / QP</td><td>71.77-72.36</td><td>-0.65 到 -1.24</td><td>三条生成路径都有互补贡献。</td></tr>
+        </tbody>
+      </table>
+      <div class="grid two">
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-07.png" alt="BIRD results table" />
+          <div class="caption">论文 Table 2：BIRD benchmark 主结果。</div>
+        </div>
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-08.png" alt="Spider results table" />
+          <div class="caption">论文 Table 3：Spider test 主结果。</div>
+        </div>
+      </div>
+      <div class="grid two">
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-09.png" alt="Upper and lower bounds of candidate generators" />
+          <div class="caption">论文 Figure 2：不同候选生成器的上界、下界和选择器表现。</div>
+        </div>
+        <div class="figure">
+          <img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/papers/chase-sql/inline/asset-10.png" alt="Ablation table" />
+          <div class="caption">论文 Table 7：完整系统的组件消融。</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mcp">
+    <div class="wrap">
+      <div class="kicker">For DataEngine</div>
+      <h2>对你的 skill + MCP 项目，CHASE-SQL 提供的是“候选查询编排 + 验证选择”思路。</h2>
+      <p class="lead">AutoLink 和 schema linking 论文关注“先找对字段”；CHASE-SQL 更进一步：字段上下文准备好以后，不要只生成一个查询行为，而是生成多条候选查询计划/SQL，通过执行反馈修复，再让选择器挑最可信的一条。</p>
+      <pre class="code">recommended MCP-style workflow:
+1. schema_link(question)                  # 来自 AutoLink / schema linking 层
+2. retrieve_values(question, linked_schema)
+3. generate_candidate("divide_conquer")
+4. generate_candidate("query_plan")
+5. generate_candidate("synthetic_examples")
+6. dry_run_and_fix(candidates)
+7. pairwise_compare(question, candidate_i, candidate_j)
+8. choose_final_query()
+9. execute_final_query()</pre>
+      <div class="grid two">
+        <div class="card">
+          <h3>适合做成 MCP tools</h3>
+          <p>`retrieve_values`、`dry_run_sql`、`explain_query`、`fix_sql_with_error`、`execute_limited` 都非常适合由 MCP 连接数据库执行。</p>
+        </div>
+        <div class="card">
+          <h3>适合放在 skill/agent 里</h3>
+          <p>问题拆解、候选生成策略选择、候选比较、最终解释和置信度说明，更适合由 skill 管理上下文和决策。</p>
+        </div>
+      </div>
+      <div class="note">工程上要注意成本：CHASE-SQL 使用 test-time compute 换准确率，会调用多次 LLM 和数据库。产品里可以设计两档：普通问题生成 1-2 个候选，复杂/高风险问题再开启 CHASE-SQL 式多候选选择。</div>
+    </div>
+  </section>
+
+  <section id="critique" class="warm">
+    <div class="wrap">
+      <div class="kicker">Reviewer-style critique</div>
+      <h2>一句话评价：这是一篇把“多试几条 SQL”做成系统工程的论文。</h2>
+      <div class="grid two">
+        <div class="card">
+          <h3>强项</h3>
+          <p>候选生成路径真的互补，选择器也不是简单投票。论文清楚证明了候选池上界和选择器能力之间的差距。</p>
+        </div>
+        <div class="card">
+          <h3>创新点</h3>
+          <p>把 Text-to-SQL 的 test-time compute 系统化：多路径 reasoning、online synthetic examples、query fixer、pairwise selection agent。</p>
+        </div>
+        <div class="card">
+          <h3>局限</h3>
+          <p>代价较高，需要多次 LLM 调用、候选执行和选择器训练。真实产品要按查询难度动态启用。</p>
+        </div>
+        <div class="card">
+          <h3>和前两篇的关系</h3>
+          <p>AutoLink/Schema Linking Analysis 解决“字段找全”；CHASE-SQL 解决“候选 SQL 生成和选择”。三者组合起来，就是一个更完整的智能问询 pipeline。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <p><strong>本页面基于：</strong> Pourreza et al., “CHASE-SQL: Multi-Path Reasoning and Preference Optimized Candidate Selection in Text-to-SQL,” ICLR 2025.</p>
+      <p>本地 PDF：CHASE_SQL_ICLR2025.pdf · 官方 PDF：<a target="_blank" rel="noopener" href="https://proceedings.iclr.cc/paper_files/paper/2025/file/974ff7b5bf08dbf9400b5d599a39c77f-Paper-Conference.pdf">ICLR 2025 proceedings PDF</a></p>
+      <p>说明：页面图片已内嵌；MathJax 公式渲染依赖 CDN，离线时公式可能显示为原始 LaTeX。</p>
+    </div>
+  </footer>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="http://NanamiAkari.github.io">Akari</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="http://nanamiakari.github.io/2026/06/03/PaperReadings/chase-sql/">http://nanamiakari.github.io/2026/06/03/PaperReadings/chase-sql/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://NanamiAkari.github.io" target="_blank">灯推的恬静小屋</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/LLM/">LLM</a><a class="post-meta__tags" href="/tags/DataEngine/">DataEngine</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E8%A7%A3%E8%AF%BB/">论文解读</a><a class="post-meta__tags" href="/tags/Text-to-SQL/">Text-to-SQL</a><a class="post-meta__tags" href="/tags/SQL/">SQL</a></div><div class="post_share"><div class="social-share" data-image="/img/pro.jpg" data-sites="wechat,weibo,qq,twitter,facebook"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2026/06/03/PaperReadings/tag/" title="TAG：SQL 查数之后，还要会解释"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">TAG：SQL 查数之后，还要会解释</div></div></a></div><div class="next-post pull-right"><a href="/2026/05/28/DataEngine/data-platform-investigator-skill-guide/" title="data-platform-investigator Skill 讲解"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">data-platform-investigator Skill 讲解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/" title="In-depth Analysis of LLM-based Schema Linking"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="title">In-depth Analysis of LLM-based Schema Linking</div></div></a></div><div><a href="/2026/05/27/PaperReadings/autolink/" title="AutoLink: Agentic Schema Linking for Text-to-SQL"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-27</div><div class="title">AutoLink: Agentic Schema Linking for Text-to-SQL</div></div></a></div><div><a href="/2026/06/03/PaperReadings/tag/" title="TAG：SQL 查数之后，还要会解释"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-06-03</div><div class="title">TAG：SQL 查数之后，还要会解释</div></div></a></div><div><a href="/2026/05/13/PaperReadings/docs2table/" title="Docs2Table: 从多文档到结构化表格"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-13</div><div class="title">Docs2Table: 从多文档到结构化表格</div></div></a></div><div><a href="/2026/05/02/PaperReadings/human-llm-collaborative-feature-engineering/" title="Human-LLM Collaborative Feature Engineering for Tabular Learning"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Human-LLM Collaborative Feature Engineering for Tabular Learning</div></div></a></div><div><a href="/2026/05/02/PaperReadings/leveraging/" title="Leveraging LLMs for Cloud Incident Extraction"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2026-05-02</div><div class="title">Leveraging LLMs for Cloud Incident Extraction</div></div></a></div></div></div><hr class="custom-hr"/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="utterances-wrap"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/img/pro.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Akari</div><div class="author-info__description">暂无</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">24</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">33</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0"><i class="fab fa-bilibili"></i><span>我的BiliBili账号</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/NanamiAkari" target="_blank" title="Github"><i class="fab fa-github-alt" style="color: #24292e;"></i></a><a class="social-icon" href="https://space.bilibili.com/385536930?spm_id_from=333.1007.0.0" target="_blank" title="bilibili"><i class="fab fa-bilibili" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is Akari's BLOG</div></div><div class="sticky_layout"><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/03/PaperReadings/tag/" title="TAG：SQL 查数之后，还要会解释">TAG：SQL 查数之后，还要会解释</a><time datetime="2026-06-03T09:01:31.000Z" title="发表于 2026-06-03 17:01:31">2026-06-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/06/03/PaperReadings/chase-sql/" title="CHASE-SQL：别只生成一个 SQL">CHASE-SQL：别只生成一个 SQL</a><time datetime="2026-06-03T08:51:10.000Z" title="发表于 2026-06-03 16:51:10">2026-06-03</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/28/DataEngine/data-platform-investigator-skill-guide/" title="data-platform-investigator Skill 讲解">data-platform-investigator Skill 讲解</a><time datetime="2026-05-28T05:40:00.000Z" title="发表于 2026-05-28 13:40:00">2026-05-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/28/DataEngine/toutiao-l1-l5-data-asset-report/" title="头条文章《企业数据资产管理核心框架：L1-L5分层架构解析》阅读汇报">头条文章《企业数据资产管理核心框架：L1-L5分层架构解析》阅读汇报</a><time datetime="2026-05-28T05:35:00.000Z" title="发表于 2026-05-28 13:35:00">2026-05-28</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2026/05/27/PaperReadings/llm-schema-linking-analysis/" title="In-depth Analysis of LLM-based Schema Linking">In-depth Analysis of LLM-based Schema Linking</a><time datetime="2026-05-27T06:58:59.000Z" title="发表于 2026-05-27 14:58:59">2026-05-27</time></div></div></div></div></div></div></main><footer id="footer" style="background-image: url('https://s2.loli.net/2023/07/09/PA95SsIY4cEo7lJ.png')"><div id="footer-wrap"><div class="copyright">&copy;2023 - 2026 By Akari</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">Hi, welcome to <a target="_blank" rel="noopener" href="https://github.com/NanamiAkari/NanamiAkari.github.io.git/">Akari's BLOG</a>!</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$'], ['\\(', '\\)']],
+      tags: 'ams'
+    },
+    chtml: {
+      scale: 1.1
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, '']
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax/es5/tex-mml-chtml.min.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typesetPromise()
+}</script><script>(() => {
+  const $mermaid = document.querySelectorAll('#article-container .mermaid-wrap')
+  if ($mermaid.length === 0) return
+  const runMermaid = () => {
+    window.loadMermaid = true
+    const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default'
+
+    Array.from($mermaid).forEach((item, index) => {
+      const mermaidSrc = item.firstElementChild
+      const mermaidThemeConfig = '%%{init:{ \'theme\':\'' + theme + '\'}}%%\n'
+      const mermaidID = 'mermaid-' + index
+      const mermaidDefinition = mermaidThemeConfig + mermaidSrc.textContent
+
+      const renderFn = mermaid.render(mermaidID, mermaidDefinition)
+
+      const renderV10 = () => {
+        renderFn.then(({svg}) => {
+          mermaidSrc.insertAdjacentHTML('afterend', svg)
+        })
+      }
+
+      const renderV9 = svg => {
+        mermaidSrc.insertAdjacentHTML('afterend', svg)
+      }
+
+      typeof renderFn === 'string' ? renderV9(renderFn) : renderV10()
+    })
+  }
+
+  const loadMermaid = () => {
+    window.loadMermaid ? runMermaid() : getScript('https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js').then(runMermaid)
+  }
+
+  btf.addGlobalFn('themeChange', runMermaid, 'mermaid')
+
+  window.pjax ? loadMermaid() : document.addEventListener('DOMContentLoaded', loadMermaid)
+})()</script><script>(() => {
+  const loadUtterances = () => {
+    let ele = document.createElement('script')
+    ele.id = 'utterances_comment'
+    ele.src = 'https://utteranc.es/client.js'
+    ele.setAttribute('repo', 'NanamiAkari/NanamiAkari.github.io')
+    ele.setAttribute('issue-term', 'pathname')
+    const nowTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'photon-dark' : 'github-light'
+    ele.setAttribute('theme', nowTheme)
+    ele.crossOrigin = 'anonymous'
+    ele.async = true
+    document.getElementById('utterances-wrap').appendChild(ele)
+  }
+
+  const utterancesTheme = theme => {
+    const iframe = document.querySelector('.utterances-frame')
+    if (iframe) {
+      const theme = theme === 'dark' ? 'photon-dark' : 'github-light'
+      const message = {
+        type: 'set-theme',
+        theme: theme
+      };
+      iframe.contentWindow.postMessage(message, 'https://utteranc.es');
+    }
+  }
+
+  btf.addGlobalFn('themeChange', utterancesTheme, 'utterances')
+
+  if ('Utterances' === 'Utterances' || !false) {
+    if (false) btf.loadComment(document.getElementById('utterances-wrap'), loadUtterances)
+    else loadUtterances()
+  } else {
+    window.loadOtherComment = loadUtterances
+  }
+})()</script></div><script>window.addEventListener('load', () => {
+  const changeContent = (content) => {
+    if (content === '') return content
+
+    content = content.replace(/<img.*?src="(.*?)"?[^\>]+>/ig, '[图片]') // replace image link
+    content = content.replace(/<a[^>]+?href=["']?([^"']+)["']?[^>]*>([^<]+)<\/a>/gi, '[链接]') // replace url
+    content = content.replace(/<pre><code>.*?<\/pre>/gi, '[代码]') // replace code
+    content = content.replace(/<[^>]+>/g,"") // remove html tag
+
+    if (content.length > 150) {
+      content = content.substring(0,150) + '...'
+    }
+    return content
+  }
+
+  const newestCommentsCacheKey = 'github-newest-comments-v2'
+
+  const normalizeCommentUrl = (url) => {
+    if (!url) return '#post-comment'
+
+    try {
+      const parsedUrl = new URL(url, window.location.origin)
+
+      if (parsedUrl.hostname === window.location.hostname) {
+        parsedUrl.protocol = window.location.protocol
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/index\.html$/, '/')
+        parsedUrl.hash = 'post-comment'
+        return parsedUrl.href
+      }
+    } catch (e) {
+      return url
+    }
+
+    return url
+  }
+
+  const findTrueUrl = (array) => {
+    Promise.all(array.map(item =>
+      fetch(item.url).then(resp => resp.json()).then(data => {
+        const urlArray = data.body.match(/(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?/ig)
+        if (data.user.login === 'utterances-bot') {
+          return urlArray.pop()
+        } else {
+          return urlArray.shift()
+        }
+      })
+    )).then(res => {
+        array = array.map((i,index)=> {
+          return {
+            ...i,
+            url: normalizeCommentUrl(res[index])
+          }
+        })
+
+        saveToLocal.set(newestCommentsCacheKey, JSON.stringify(array), 10/(60*24))
+        generateHtml(array)
+    });
+  }
+
+  const getComment = () => {
+    fetch('https://api.github.com/repos/NanamiAkari/NanamiAkari.github.io/issues/comments?sort=updated&direction=desc&per_page=6&page=1',{
+      "headers": {
+        Accept: 'application/vnd.github.v3.html+json'
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        const githubArray = data.map(item => {
+          return {
+            'avatar': item.user.avatar_url,
+            'content': changeContent(item.body_html),
+            'nick': item.user.login,
+            'url': item.issue_url,
+            'date': item.updated_at,
+            'githubUrl': item.html_url
+          }
+        })
+        findTrueUrl(githubArray)
+      }).catch(e => {
+        const $dom = document.querySelector('#card-newest-comments .aside-list')
+        $dom.textContent= "无法获取评论，请确认相关配置是否正确"
+      })
+  }
+
+  const generateHtml = array => {
+    let result = ''
+
+    if (array.length) {
+      for (let i = 0; i < array.length; i++) {
+        result += '<div class=\'aside-list-item\'>'
+
+        if (true) {
+          const name = 'data-lazy-src'
+          result += `<a href='${array[i].url}' class='thumbnail'><img ${name}='${array[i].avatar}' alt='${array[i].nick}'></a>`
+        }
+
+        result += `<div class='content'>
+        <a class='comment' href='${array[i].url}' title='${array[i].content}'>${array[i].content}</a>
+        <div class='name'><span>${array[i].nick} / </span><time datetime="${array[i].date}">${btf.diffDate(array[i].date, true)}</time></div>
+        </div></div>`
+      }
+    } else {
+      result += '没有评论'
+    }
+
+    let $dom = document.querySelector('#card-newest-comments .aside-list')
+    $dom.innerHTML= result
+    window.lazyLoadInstance && window.lazyLoadInstance.update()
+    window.pjax && window.pjax.refresh($dom)
+  }
+
+  const newestCommentInit = () => {
+    if (document.querySelector('#card-newest-comments .aside-list')) {
+      const data = saveToLocal.get(newestCommentsCacheKey)
+      if (data) {
+        generateHtml(JSON.parse(data))
+      } else {
+        getComment()
+      }
+    }
+  }
+
+  newestCommentInit()
+  document.addEventListener('pjax:complete', newestCommentInit)
+})</script><script src="/js/custom.js" defer></script><script id="canvas_nest" defer="defer" color="120,150,180" opacity="0.22" zIndex="-1" count="45" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-nest.min.js"></script><script id="click-show-text" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/click-show-text.min.js" data-mobile="false" data-text="灵感,推理,实验,论文,数据,模型" data-fontsize="16px" data-random="true" async="async"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["link[rel=\"canonical\"]","meta[property=\"og:image\"]","meta[property=\"og:title\"]","meta[property=\"og:url\"]","head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"]):not([href="/assets/data-platform-standard-dictionary-experiment/schema-minerpro-dictionary-experiment-report.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-pack.html"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-review-sample.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/standard-dictionary.full.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-tasks.json"]):not([href="/assets/data-platform-standard-dictionary-experiment/full-dictionary-eval.latest.json"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><div id="local-search"><div class="search-dialog"><nav class="search-nav"><span class="search-dialog-title">搜索</span><span id="loading-status"></span><button class="search-close-button"><i class="fas fa-times"></i></button></nav><div class="is-center" id="loading-database"><i class="fas fa-spinner fa-pulse"></i><span>  数据库加载中</span></div><div class="search-wrap"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div><hr/><div class="no-result" id="local-search-results"></div><div id="local-search-stats-wrap"></div></div></div><div id="search-mask"></div><script src="/js/search/local-search.js"></script></div></div><script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/z16.model.json"},"display":{"position":"left","width":200,"height":300},"mobile":{"show":true},"log":false});</script></body></html>

@@ -4,6 +4,76 @@
   
     
     <entry>
+      <title>TAG：SQL 查数之后，还要会解释</title>
+      <link href="/2026/06/03/PaperReadings/tag/"/>
+      <url>/2026/06/03/PaperReadings/tag/</url>
+      
+        
+        <content type="html"><![CDATA[CIDR 2025 · Table-Augmented Generation · AI + Databases TAG：SQL 查数之后，还要会解释 这篇论文的核心观点很简单：真实用户问数据库，不只是想要 SQL 执行结果。他们还会问“为什么销售下降”“哪些评论是正面的”“Bay Area 学校有哪些”。这些问题需要数据库的精确计算，也需要 LLM 的语义理解和世界知识。 论文：Text2SQL is Not Enough 出处：CIDR 2025 提出：Table-Augmented Generation 代码：TAG-Research/TAG-Bench 做了什么 为什么不够 TAG 三步 设计空间 Benchmark 实验结果 项目落地 评价 What it does TAG 做的事：把数据库查询和 LLM 生成统一成一个问答范式。 Text2SQL 关注“自然语言能不能翻译成 SQL”。TAG 关注更大的问题：“用户对数据库提出任意自然语言问题，系统如何结合数据库执行能力和 LLM 推理能力，给出最终自然语言答案？” 数据库负责精确计算 过滤、排序、聚合、join、大规模扫描，这些是 DBMS 擅长的。 LLM 负责语义和知识 情感判断、文本摘要、世界知识、业务概念解释，这些是 LLM 擅长的。 答案不是只有表格 很多用户要的是解释、总结、原因和洞察，而不是一张原始查询结果表。 Why Text2SQL/RAG are not enough Text2SQL 和 RAG 都只覆盖了真实问询的一小块。 方法 适合什么 短板 Text2SQL 能完全表达为关系代数/SQL 的问题。 无法处理“评论是否正面”“这家公司是否属于零售行业”这类语义和世界知识问题。 RAG 从少量相关记录中查找答案。 通常只是 point lookup，不擅长大规模过滤、聚合、排序、join，也容易把精确计算交给 LLM。 TAG 既需要数据库计算，又需要 LLM 语义推理/世界知识/答案生成的问题。 自动合成高质量 TAG pipeline 仍是开放问题。 一句话：Text2SQL 到 SQL 执行就停了，RAG 往往只检索几行给模型；TAG 要求系统先算出相关表格，再让模型基于这些数据生成答案。 TAG model TAG 的三步：syn、exec、gen。 论文把 TAG 定义成一个简单但很有表达力的三阶段模型：先把用户请求转成可执行查询，再由数据库执行得到相关数据表，最后由 LLM 基于原问题和数据表生成自然语言答案。 1 Query Synthesis \(syn(R) \rightarrow Q\)：把用户请求 \(R\) 转成数据库可执行查询 \(Q\)，可能是 SQL，也可能包含 semantic operators。 2 Query Execution \(exec(Q) \rightarrow T\)：数据库执行查询，得到相关数据表 \(T\)。这里可以利用 DBMS 的计算能力。 3 Answer Generation \(gen(R,T) \rightarrow A\)：LLM 读取原问题和结果表，生成最终自然语言答案 \(A\)。 $$syn(R) \rightarrow Q,\quad exec(Q) \rightarrow T,\quad gen(R,T) \rightarrow A$$ 论文 Figure 1：TAG 示例。问题要求总结最高票房经典爱情电影的评论，系统先查出 Titanic 的相关评论，再由 LLM 总结。 Design space TAG 的创新点是把很多 AI + DB 交互放到同一个框架里。 查询类型更广 既包括 point query，也包括需要跨多行推理的 aggregation、ranking、summarization。 数据模型更广 论文实验用关系数据库，但 TAG 可以扩展到半结构化、非结构化、多模态数据。 执行引擎更广 数据库 API 不一定只是 SQL，也可以包含 LM UDF、semantic filter、semantic rank、semantic aggregation。 example TAG-style query idea: SELECT movie_title, review, revenue FROM movies WHERE genre = 'Romance' AND sem_filter(movie_title, 'is considered a classic') ORDER BY revenue DESC LIMIT 1 Then ask LLM: Summarize the reviews for the selected movie. Benchmark 论文构造了一个 TAG benchmark，专门考两类难题。 作者基于 BIRD 选了 5 个领域数据库，改写出 80 个问题：40 个需要世界知识，40 个需要语义推理。问题覆盖 match-based、comparison、ranking、aggregation 等类型。 需要世界知识 比如“Bay Area 的学校有哪些”。Bay Area 这个概念不一定在表里，需要模型知道地理/现实世界知识。 需要语义推理 比如“最讽刺的评论 Top 3”。讽刺不是普通 SQL 条件，需要 LLM 对文本做语义判断。 Baseline 做法 Text2SQL 直接生成 SQL，SQL 执行结果就是答案。 RAG 把行序列化后做向量检索，取 10 行给 LLM。 Retrieval + LM Rank RAG 检索后，再让 LLM 给行打分重排。 Text2SQL + LM 先用 SQL 找相关行，再把行给 LLM 生成答案。 Hand-written TAG 专家手写 TAG pipeline，用 LOTUS 的 semantic operators 执行。 Results 结果很直接：普通 Text2SQL/RAG 都很弱，手写 TAG 明显更强。 0.55 Hand-written TAG overall exact match 整体 exact match 55%，显著高于其他 baseline。 ≤0.20 Standard baselines Text2SQL、RAG、Text2SQL+LM 等标准方法都没有超过 20%。 2.94s Hand-written TAG average time 准确率更高的同时，平均执行时间也相对低。 论文 Table 1：不同方法在 TAG benchmark 上的 exact match 和执行时间。 论文 Table 2：需要 Knowledge 和 Reasoning 的问题上，TAG 都超过 50%。 论文 Figure 2：聚合型问题示例。RAG 答案不完整，Text2SQL+LM 没用到数据库数据，Hand-written TAG 最完整。 For DataEngine 对 DataEngine 来说，TAG 是“智能问询最终形态”的参考。 前面的 AutoLink 和 Schema Linking 论文帮助我们找字段，CHASE-SQL 帮我们多候选生成和选择 SQL。TAG 提醒我们：很多时候 SQL 结果不是终点，系统还要基于结果表做解释、摘要、分类和原因分析。 recommended DataEngine TAG pipeline: 1. understand_question(question) 2. schema_link(question) # 找表和字段 3. synthesize_query_or_plan(question, schema) # 生成 SQL / semantic query 4. execute_query_with_mcp(plan) # DB 精确计算 5. semantic_ops_if_needed(rows) # 情感、分类、排序、摘要等 6. generate_answer(question, computed_table) # 给用户自然语言答案 7. cite_rows_and_confidence(answer) 适合 MCP 做的 执行 SQL、过滤/聚合、取样、分页、权限控制、结果缓存、调用数据库内置 ML/UDF。 适合 skill/agent 做的 判断问题是否需要世界知识、是否需要语义操作、如何把结果表转成解释性答案。 一个重要产品判断：用户问“有多少、列出、排名”时，Text2SQL 可能足够；用户问“为什么、哪些评论正面、总结趋势、是否属于某行业”时，就要进入 TAG 模式。 Reviewer-style critique 一句话评价：这篇论文把智能问询的边界从“查数”推到了“解释数据”。 强项 问题定义很准：真实业务问询常常需要 SQL + LLM，而不是二选一。TAG 三步模型简洁但覆盖面广。 创新点 把 Text2SQL 和 RAG 都看作 TAG 的特例，并提出更贴近真实用户问题的 TAG benchmark。 局限 最强结果来自 hand-written TAG pipelines，说明自动合成 TAG pipeline 仍然很难，这正是后续系统研究空间。 和前面几篇的关系 AutoLink 找 schema，CHASE-SQL 生成和选择 SQL，TAG 负责把查询结果变成有语义的答案。组合起来才是完整智能问询。 本页面基于： Biswal et al., “Text2SQL is Not Enough: Unifying AI and Databases with TAG,” CIDR 2025. 本地 PDF：Text2SQL_is_Not_Enough_TAG_CIDR2025.pdf · 官方 PDF： CIDR 2025 PDF · Benchmark： TAG-Research/TAG-Bench 说明：页面图片已内嵌；MathJax 公式渲染依赖 CDN，离线时公式可能显示为原始 LaTeX。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 论文解读 </tag>
+            
+            <tag> Text-to-SQL </tag>
+            
+            <tag> TAG </tag>
+            
+            <tag> 数据库 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>CHASE-SQL：别只生成一个 SQL</title>
+      <link href="/2026/06/03/PaperReadings/chase-sql/"/>
+      <url>/2026/06/03/PaperReadings/chase-sql/</url>
+      
+        
+        <content type="html"><![CDATA[ICLR 2025 · Text-to-SQL · Test-time compute CHASE-SQL：别只生成一个 SQL 这篇论文的核心很直观：复杂数据库问题里，LLM 第一次写出的 SQL 不一定最好。CHASE-SQL 让模型从多条思路生成候选 SQL，再用训练过的选择器两两比较，挑出最可能正确的一条。 论文：CHASE-SQL 出处：ICLR 2025 关键词：multi-path reasoning 关键词：preference optimized selection 做了什么 为什么有效 框架流程 三条生成路径 选择器 实验结果 项目落地 评价 What it does CHASE-SQL 做的不是“更会写一次 SQL”，而是“多写几种，再认真挑”。 传统 Text-to-SQL 常常让 LLM 生成一条 SQL，或者采样多条后用 self-consistency 选出现次数最多的执行结果。CHASE-SQL 认为这不够：最常见的答案不一定正确，尤其是复杂查询里，少数候选反而可能是对的。 多路径生成 用三种不同策略生成候选 SQL：Divide-and-Conquer CoT、Query Plan CoT、Online Synthetic Examples。 修复候选 对语法错误、空结果等候选 SQL 做 LLM-based query fixer，最多迭代修复三次。 偏好选择 不用简单多数投票，而是训练 binary selection model，两两比较候选 SQL，累计得分最高者胜出。 论文 Figure 1：CHASE-SQL 总体框架，包含 value retrieval、candidate generation、query fixer 和 selection agent。 Motivation 为什么不能只用 self-consistency？因为“多数一致”不等于“正确”。 论文在 BIRD dev 上展示：单条生成是 63.01% EX，self-consistency 提到 68.84%，但如果能从候选池里总是选中正确 SQL，上界能到 82.79%。这个巨大差距说明：候选池里常常已经有正确答案，真正难的是把它挑出来。 63.01% Single query EX 只生成一条 SQL 的基线。 68.84% Self-consistency EX 按执行结果聚类，选择最大簇。 82.79% Candidate pool upper bound 如果选择器足够强，理论提升空间很大。 论文 Table 1：self-consistency 与 oracle upper bound 的差距，是 CHASE-SQL 设计选择器的动机。 Pipeline 完整流程可以看成四步：找值、生成、修复、选择。 1 Value retrieval 先从问题里抽关键词，再用 LSH、embedding similarity 和 edit distance 找数据库中的相关值。 2 Candidate generators 三条不同推理路径生成候选 SQL，增加“至少有一条正确”的概率。 3 Query fixer 用错误信息、空结果等反馈反思并修复候选 SQL。 4 Selection agent 训练过的选择器两两比较候选，最终选累计得分最高的 SQL。 CHASE-SQL(question, database): values = retrieve_values(question, database) candidates = [] candidates += divide_and_conquer_cot(question, schema, values) candidates += query_plan_cot(question, schema, values) candidates += online_synthetic_examples(question, schema, values) fixed = query_fixer(candidates) final_sql = pairwise_selection_agent(fixed) return final_sql Candidate generation 三条生成路径各有擅长，不是简单重复采样。 CHASE-SQL 的关键不是“同一个 prompt 多采几次”，而是从不同思考方式出发，让候选 SQL 真正多样化，同时保持质量。 1. Divide-and-Conquer CoT 先把复杂问题拆成子问题，为每个子问题生成 partial SQL，再 assemble 成最终 SQL，并做优化。 适合： 嵌套查询、复杂 WHERE/HAVING、多步骤数学计算。 2. Query Plan CoT 让推理过程模仿数据库执行计划：先找相关表，再说明 join/filter/count/match，最后选择返回列。 适合： 需要理解表关系、join 路径和过滤操作的问题。 3. Online Synthetic Examples 针对当前问题和数据库，在线生成大量 question-SQL 示例，作为 many-shot context 帮模型理解 schema 和 SQL 结构。 适合： 为当前数据库补充定制 few-shot 示例，提升候选多样性。 论文 Table 4：单个候选生成器与 query fixer 的效果对比。 论文 Figure 3：三种生成器能解决不同样本，说明它们提供了真实互补性。 Preference optimized selection 选择器不是排序所有候选，而是两两比较。 如果一次让模型比较很多候选，它很难稳定判断。CHASE-SQL 把问题改成二分类：给定用户问题、两个候选 SQL 和它们使用的 schema union，让模型判断哪个更可能正确。所有候选两两比较后，累计分最高的 SQL 被选中。 $$c_f = \arg\max_{c_i \in C} r_i$$ 其中 \(r_i\) 是候选 SQL 在两两比较中累计赢得的分数。 选择方式 直观含义 论文观察 Self-consistency 选执行结果最多的一簇。 比单条生成好，但会被“多数错答案”误导。 Ranker agent 一次性把所有候选给模型排序。 不如 binary selection，候选太相似时更难判断。 Binary selection agent 两两比较候选并累计得分。 CHASE-SQL 的核心优势，显著超过 self-consistency。 论文 Table 5：fine-tuned selection models 的二分类选择准确率更高。 论文 Table 6：selection agent 在不同候选生成方法和温度下都明显强于 self-consistency。 Results 实验结果：BIRD 上达到 73.0%，Spider 上无需专门调参也有强泛化。 73.0% BIRD test EX 论文报告 CHASE-SQL + Gemini 1.5 Pro 在 BIRD test 上达到 73.0%。 73.01% BIRD dev EX dev 上也达到 73.01%，论文提交时位居 BIRD leaderboard 顶部。 87.6% Spider test EX 没有使用 Spider 分布专门训练选择器或改 few-shot，仍有很强结果。 组件移除 BIRD dev EX 下降 说明 CHASE-SQL All 73.01 - 完整系统。 with self-consistency 68.84 -4.17 多数投票明显不如选择器。 with ranker agent 65.51 -7.50 一次性排序不如两两比较。 without LSH 70.09 -2.92 值检索很重要。 without Query Fixer 69.23 -3.78 修复循环贡献明显。 without DC / OS / QP 71.77-72.36 -0.65 到 -1.24 三条生成路径都有互补贡献。 论文 Table 2：BIRD benchmark 主结果。 论文 Table 3：Spider test 主结果。 论文 Figure 2：不同候选生成器的上界、下界和选择器表现。 论文 Table 7：完整系统的组件消融。 For DataEngine 对你的 skill + MCP 项目，CHASE-SQL 提供的是“候选查询编排 + 验证选择”思路。 AutoLink 和 schema linking 论文关注“先找对字段”；CHASE-SQL 更进一步：字段上下文准备好以后，不要只生成一个查询行为，而是生成多条候选查询计划/SQL，通过执行反馈修复，再让选择器挑最可信的一条。 recommended MCP-style workflow: 1. schema_link(question) # 来自 AutoLink / schema linking 层 2. retrieve_values(question, linked_schema) 3. generate_candidate("divide_conquer") 4. generate_candidate("query_plan") 5. generate_candidate("synthetic_examples") 6. dry_run_and_fix(candidates) 7. pairwise_compare(question, candidate_i, candidate_j) 8. choose_final_query() 9. execute_final_query() 适合做成 MCP tools `retrieve_values`、`dry_run_sql`、`explain_query`、`fix_sql_with_error`、`execute_limited` 都非常适合由 MCP 连接数据库执行。 适合放在 skill/agent 里 问题拆解、候选生成策略选择、候选比较、最终解释和置信度说明，更适合由 skill 管理上下文和决策。 工程上要注意成本：CHASE-SQL 使用 test-time compute 换准确率，会调用多次 LLM 和数据库。产品里可以设计两档：普通问题生成 1-2 个候选，复杂/高风险问题再开启 CHASE-SQL 式多候选选择。 Reviewer-style critique 一句话评价：这是一篇把“多试几条 SQL”做成系统工程的论文。 强项 候选生成路径真的互补，选择器也不是简单投票。论文清楚证明了候选池上界和选择器能力之间的差距。 创新点 把 Text-to-SQL 的 test-time compute 系统化：多路径 reasoning、online synthetic examples、query fixer、pairwise selection agent。 局限 代价较高，需要多次 LLM 调用、候选执行和选择器训练。真实产品要按查询难度动态启用。 和前两篇的关系 AutoLink/Schema Linking Analysis 解决“字段找全”；CHASE-SQL 解决“候选 SQL 生成和选择”。三者组合起来，就是一个更完整的智能问询 pipeline。 本页面基于： Pourreza et al., “CHASE-SQL: Multi-Path Reasoning and Preference Optimized Candidate Selection in Text-to-SQL,” ICLR 2025. 本地 PDF：CHASE_SQL_ICLR2025.pdf · 官方 PDF： ICLR 2025 proceedings PDF 说明：页面图片已内嵌；MathJax 公式渲染依赖 CDN，离线时公式可能显示为原始 LaTeX。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 数据工程 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> LLM </tag>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 论文解读 </tag>
+            
+            <tag> Text-to-SQL </tag>
+            
+            <tag> SQL </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>data-platform-investigator Skill 讲解</title>
       <link href="/2026/05/28/DataEngine/data-platform-investigator-skill-guide/"/>
       <url>/2026/05/28/DataEngine/data-platform-investigator-skill-guide/</url>
