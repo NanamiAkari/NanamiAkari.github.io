@@ -4,6 +4,43 @@
   
     
     <entry>
+      <title>LinkAlign Lite 数据中台 Schema Linking 实验报告</title>
+      <link href="/2026/06/11/DataEngine/linkalign-lite-experiment-report/"/>
+      <url>/2026/06/11/DataEngine/linkalign-lite-experiment-report/</url>
+      
+        
+        <content type="html"><![CDATA[LinkAlign Lite 数据中台 Schema Linking 实验报告 生成日期：2026-06-11 项目目录： D:\AGENT\data-skill-schema-minerpro 实验主题：把 D:\AGENT\DataEngine\LinkAlign 论文解读中的 schema linking 思想，应用到浙江音乐学院数据中台 skill&#x2F;MCP 项目中，并用全量字典任务与 doops 在线元数据验证做对比评估。 1. 实验结论 这次实验已经从“只看几个例子”升级成了两层评测： 全量字典离线评测：覆盖 100 条由全量标准字典生成的任务，包含 business、table、relation、field、alias 五类问题，各 20 条。 LinkAlign Lite 在线评测：覆盖 104 条问题，其中包含上述 100 条全量字典任务，以及 4 条真实业务问题；每条都通过 doops 在线读取 Hive Metastore 元数据确认候选表字段。 总体结论： 结论 说明 LinkAlign Lite 能显著减少候选噪声 平均候选表从 7.97 张降到 2.60 张，噪声削减约 67.5%。 过滤后候选表“纯度”提升明显 原始候选集合 precision 为 9.4%，LinkAlign 保留集合 precision 为 23.4%。只看原始召回已命中的 51 条任务，precision 从 19.3% 提升到 47.7%。 召回仍是主要短板 104 条中只有 51 条在原始候选里包含期望表。LinkAlign 后处理只能过滤已有候选，不能凭空找回召回阶段没找出的表。 过滤存在过严问题 11&#x2F;104 条出现“正确表被过滤”的情况，主要发生在教学任务、组织架构、人员&#x2F;部门等相邻业务表。 DeepSeek 辅助有效但成本更高 12 条样本中，LLM 版保留集合 precision 从规则版 27.1% 提升到 46.7%，MRR 从 37.5% 提升到 58.3%，但耗时从约 24.7 秒增加到约 206 秒。 doops 在线元数据链路稳定 本次 LinkAlign Lite 104 条评测 doops 验证率为 100%，每条问题都能在线确认候选表元数据。 最适合现在落地的方式：把 LinkAlign Lite 作为“问询前的 schema linking 上下文生成器”，用于给用户、SQL 生成器或后续 Agent 提供更干净的表字段候选，而不是直接替代 SQL 执行。 2. LinkAlign 思想如何映射到本项目 LinkAlign 论文把大规模多库 Text-to-SQL 之前的 schema linking 拆成三个关键步骤： 语义增强检索：先理解用户真正要什么，再补充隐含实体、属性、约束和改写问题。 无关 schema 隔离：从候选表里剔除看起来相关但不能直接回答问题的表。 表字段抽取：从保留表里抽出真正需要的字段，给 SQL 生成或人工复核使用。 本项目的对应实现如下： LinkAlign 模块 本项目实现 输出 Query&#x2F;Semantic Enhancement semanticAudit ，规则版或 DeepSeek 版语义审计 实体、属性、约束、可能表、可能字段、改写查询 Schema Retrieval 标准字典 + 本地 Hive 元数据 + 业务目录召回 原始候选表列表 Online Verification doops 只读查询 Hive Metastore 表是否在线存在、字段、字段注释、存储位置 Response Filtering kept/rejected 候选过滤 保留表、剔除表、原因、置信度 Schema Extraction selectedColumns 字段角色识别 身份键、状态字段、时间字段、度量字段、维度字段、关联键 流程图： flowchart LR Q["用户业务问题"] --> A["语义审计 semanticAudit"] A --> B["标准字典 grounding"] B --> C["本地目录与元数据召回候选表"] C --> D["doops 在线 Hive Metastore 验证"] D --> E["LinkAlign 过滤 kept&#x2F;rejected"] E --> F["字段角色抽取 selectedColumns"] F --> G["给 Skill、前端、SQL 生成器或人工复核使用"] 3. 本次新增与使用方式 新增实验脚本： 1 D:\AGENT\data-skill-schema-minerpro\mcp\evals\run-linkalign-lite-experiment.js 新增 npm 命令： 1 2 cd D:\AGENT\data -skill-schema-minerpro \mcp npm run eval:linkalign -lite 本次实际运行命令： 1 2 3 4 5 6 cd D:\AGENT\data -skill-schema-minerpro \mcp npm run check npm run security:check npm run eval:full -dictionary npm run eval:linkalign -lite -- --limit 104 --output evals/linkalign -lite-experiment .latest.json npm run eval:linkalign -lite -- --limit 12 --llm --output evals/linkalign -lite-experiment .llm -sample .json 单个问题使用示例： 1 2 cd D:\AGENT\data -skill-schema-minerpro \mcp npm run cli -- linkalign -lite "学生期末评价完成状态应该用哪些表，字段大概是什么含义？" --max-rows 8 --max-fields-per-table 16 --no-llm 4. 数据与字典规模 本次实验使用的全量标准字典： 1 D:\AGENT\data-skill-schema-minerpro\mcp\data\standard-dictionary.full.json 字典规模： 项目 数量 标准概念 488 别名&#x2F;同义词 4,583 推荐表绑定 624 字段语义关键词 4,550 概念关系 1,387 覆盖业务域 34 全量评测任务： 1 D:\AGENT\data-skill-schema-minerpro\mcp\evals\full-dictionary-tasks.json 任务分布： 任务类型 数量 business：按业务含义找表 20 table：给定资源表解释业务 20 relation：查相邻概念或上下游关系 20 field：按字段语义定位表 20 alias：用简称&#x2F;别名定位资源 20 LinkAlign Lite 在线评测在这 100 条任务之外，额外加入了 4 条真实业务问题： 真实业务问题 目的 学生期末评价完成状态应该用哪些表 验证状态类业务表和字段角色识别 查一下所有教师的名单 验证教师&#x2F;教职工名单类主表筛选 教学任务授课教师应该用哪些表 验证教学任务与教师关系表 学生基本信息、学号、姓名、学院和专业应该查哪些表 验证学生基础信息与专业学院字段 5. 指标解释 本次报告里有两组指标，不要混着看。 第一组是排名指标： 指标 含义 P@5 前 5 个结果里有多少比例是期望表。比如前 5 个命中 2 个，就是 2&#x2F;5 &#x3D; 40%。 R@5 期望表中有多少比例出现在前 5 个结果里。比如期望表有 4 个，前 5 个命中 2 个，就是 2&#x2F;4 &#x3D; 50%。 MRR 第一个正确表排在第几名。第 1 名命中为 1，第 2 名命中为 0.5，第 3 名命中为 0.333；完全没命中为 0。 第二组是集合指标： 指标 含义 set precision 不固定看前 5 个，而是看最终返回的候选集合里，相关表占多少。这个更适合评价 LinkAlign 过滤后的候选纯度。 set recall 期望表中有多少被最终保留下来。 noise reduction 被过滤表数量 &#x2F; 原始候选表数量。 over-filtered rate 原始候选中有正确表，但过滤阶段把正确表剔除了的任务比例。 role coverage 保留表中有字段角色识别结果的表占比。 doops verified rate 候选表通过 doops 在线 Hive Metastore 验证的比例。 注意：LinkAlign 过滤后通常只保留 2 到 4 张表，如果继续用固定分母的 P@5，它会因为“结果少于 5 个”被天然惩罚。所以对 LinkAlign 更应该看 set precision、set recall、noise reduction 和 over-filtered rate。 6. 全量字典离线评测结果 这一步使用已有的 run-full-dictionary-eval.js ，不走 doops，只看业务目录、标准字典和关系字典对候选排序的影响。 模式 P@5 R@5 MRR conceptRecall relationAccuracy 原始目录检索 baseline 26.4% 84.9% 84.8% 无 无 标准字典 21.0% 74.6% 82.2% 88.0% 12.0% 关系增强字典 21.0% 74.6% 82.2% 88.0% 86.0% 解释： 标准字典和关系增强字典没有让 P@5、R@5 直接变高，原因是全量任务的“期望表”很多来自目录生成的伪 gold，字典会把概念、别名、字段语义补全，但排序仍受业务目录和表名相似度影响。 关系增强字典最大的变化在 relationAccuracy：从 12.0% 提升到 86.0%。这说明“概念之间的关系”确实被补上了，但关系补全不等于前 5 张表排序一定更准。 7. LinkAlign Lite 在线评测结果 这一步使用 run-linkalign-lite-experiment.js ，覆盖 104 条任务，全部走 doops 在线 Hive Metastore 元数据验证。 7.1 总体结果 指标 原始候选 LinkAlign 保留候选 平均候选表数量 7.97 2.60 P@5 12.9% 10.8% R@5 40.1% 35.8% MRR 38.4% 35.8% set precision 9.4% 23.4% set recall 42.9% 35.8% 平均字段抽取数 无 22.15 字段角色覆盖率 无 95.1% 噪声削减率 无 67.5% doops 在线验证率 100% 100% 结论： LinkAlign Lite 的主要收益不是“让前 5 名排名指标全部变高”，而是把一个很吵的候选列表压缩成更适合人工复核或 SQL 生成器使用的 schema 上下文。也就是说，它更像一个候选清洗器，而不是单纯的召回排序器。 7.2 只看“原始召回已经命中”的任务 104 条任务中，有 51 条的原始候选里至少包含 1 张期望表。只看这 51 条，更能看出过滤器本身的效果。 指标 原始候选 LinkAlign 保留候选 任务数 51 51 平均候选表数量 7.94 3.04 set precision 19.3% 47.7% set recall 87.6% 73.0% 噪声削减率 无 61.9% 过度过滤任务数 无 11 解释： 当召回层已经把正确表放进候选后，LinkAlign Lite 能把候选纯度提升约 2.47 倍，但会损失一部分召回。这个取舍符合 LinkAlign 论文里的核心矛盾：语义增强召回会带来噪声，过滤噪声又可能误伤正确 schema。 8. DeepSeek 辅助样本结果 为了测试大模型放进语义审计和候选过滤后的变化，本次额外跑了 12 条 DeepSeek 样本。这个样本不是主评测，只用于看趋势。 指标 规则版前 12 条 DeepSeek 版前 12 条 任务数 12 12 原始候选 set precision 13.5% 14.6% 原始候选 set recall 45.8% 51.4% 保留候选 set precision 27.1% 46.7% 保留候选 set recall 36.1% 48.6% 保留候选 MRR 37.5% 58.3% 噪声削减率 62.5% 55.2% 过度过滤率 16.7% 8.3% doops 在线验证率 100% 100% 总耗时 约 24.7 秒 约 206.0 秒 解释： DeepSeek 版能更好地理解问题意图，尤其是“教学任务授课教师”这类关系表问题，保留集合的 precision 和 MRR 都有明显提升。但是耗时约为规则版的 8 倍以上，所以建议： 普通查询默认用规则版，速度快、结果稳定。 候选过多、用户问题模糊、或需要生成 SQL 前上下文时，再启用 DeepSeek。 LLM 输出仍需要 doops 元数据验证兜底，不能只相信模型判断。 9. 典型样例 9.1 学生期末评价完成状态 问题： 1 学生期末评价完成状态应该用哪些表，字段大概是什么含义？ 原始候选 8 张： 1 2 3 4 5 6 7 8 ods_mks_xsqmpjwczt_z ods_mks_xsqmpjwczt dwd_jwxt_xsjbxx dwd_mks_xsxx ods_lxxt_xsxh dwd_mks_xskb dwd_zyys_xsxx dwd_xy_xsxx LinkAlign Lite 保留 2 张： 表 含义 关键字段 ods_mks_xsqmpjwczt_z 学生期末评价完成状态_总 xh 学号， wid 主键， pjzt 是否完成评价， xnxq 学年学期， updatetime 更新时间 ods_mks_xsqmpjwczt 学生期末评价完成状态 xh 学号， kcmc 课程名称， kch 课程代码， pjzt 是否完成评价 指标： 阶段 precision recall 原始候选集合 25.0% 100.0% LinkAlign 保留集合 100.0% 100.0% 这个样例是成功案例。用户问的是“评价完成状态”，而不是“学生基本信息”。LinkAlign Lite 把学生基本信息、学生课表、学生画像类表降为噪声候选，只保留真正含 pjzt 状态字段的麦可思评价表。 9.2 查所有教师名单 问题： 1 查一下所有教师的名单 原始候选 8 张中混入了学生、课表、开学日期等表。LinkAlign Lite 保留： 表 判断 dwd_mks_jzgxx 教职工信息，包含 gh 工号、 xm 姓名、 zc 职称、 xydm 院系代码 dwd_rsxt_jsjbxx 人事系统教师信息，包含姓名、职工号、职称、教职工类别 ods_yjsjw_jsjbxx 研究生教务教师信息，包含教师职称、教师类型、导师状态等字段 dwd_mks_kxrq 被保留但可疑，表注释为开学日期，字段注释里出现教师姓名和职工号，需要后续规则修正 指标： 阶段 precision recall 原始候选集合 37.5% 100.0% LinkAlign 保留集合 75.0% 100.0% 这个样例说明 LinkAlign Lite 对“名单&#x2F;主表”类查询有效，但也暴露了一个问题：如果在线元数据里字段注释异常，规则会被误导。 dwd_mks_kxrq 应该被降级为可疑候选。 9.3 教学任务授课教师 问题： 1 教学任务授课教师应该用哪些表，字段大概是什么含义？ 原始候选包含： 1 2 3 4 5 6 7 8 ods_bksjw_jxrw_skjs ods_bksjw_jxhd_skjslb ods_bksjw_jxrw dwd_jwxt_jxrw ods_yjsjw_pyjxrw ods_yjsjw_pyjxrwlw ods_yjsjw_pyjxrwl ods_bksjw_jxrw_sj LinkAlign Lite 只保留： 1 ods_bksjw_jxrw_skjs 原因是这张表注释为“教学任务-授课教师”，字段包含： 字段 含义 lesson_id 教学任务 ID teacher_id 教师信息 ID ord 教师在教学任务内的顺序 从业务理解看，这个结果有合理性，因为用户问的是“授课教师”， ods_bksjw_jxrw_skjs 是教学任务和教师之间的桥接表。但是评测期望表包含 dwd_jwxt_jxrw 、 ods_bksjw_jxrw_sj 、 dwd_jwxt_kcb ，没有把桥接表列入 gold，导致指标上表现为 0。 这个样例说明：后续人工标注 gold 时，不能只标主表，也要标关系表、桥接表，否则会误判 LinkAlign 的结果。 10. 问题分析 10.1 主要问题是召回层不足 104 条在线任务中，只有 51 条原始候选里包含期望表。这意味着 53 条在进入 LinkAlign 过滤前就已经找不到 gold 表。 这类问题不能靠过滤器解决，需要优化： 标准字典里的 preferredTables 覆盖。 别名、旧表名、目录资源名和物理表名之间的映射。 搜索阶段对字段名、字段注释、资源名称的权重。 DataRiver 逻辑表、血缘表与 Hive 物理表之间的桥接。 10.2 过滤规则有时过严 本次过度过滤 11 条，占 10.6%。典型原因： 原因 表现 名单&#x2F;主表规则过强 对组织架构、部门信息、教学任务这类非名单表误判 目标实体判断过强 问“教职工基本信息”时，把一些同主题学生&#x2F;课表表直接过滤 gold 标注粒度不够 用户问关系表，但 gold 只标主表，导致正确桥接表被算错 字段注释质量影响 字段注释不准时，规则会保留错误表或误删正确表 10.3 P@5 不能单独评价 LinkAlign LinkAlign 的目标是“缩小候选上下文”，不是返回固定 5 张表。如果只看 P@5，保留 2 张表时分母仍是 5，天然吃亏。 更合理的评价方式是组合看： 1 2 3 4 召回层：P@5 / R@5 / MRR 过滤层：set precision / set recall / noise reduction / over-filtered rate 字段层：role coverage / selected field count / 人工复核通过率 在线层：doops verified rate 11. 当前能做到什么 这次实验后，项目已经可以做到以下具体事情： 输入一个中文业务问题，先用标准字典定位业务概念、别名、推荐表和字段关键词。 从本地目录和 Hive 元数据缓存中召回候选表。 使用 doops 在线查询 Hive Metastore，确认候选表真实存在，并拿到字段、注释、存储位置。 对候选表给出 kept 或 rejected 判断。 对每张表给出保留或剔除原因。 对保留表抽取关键字段，并标注字段角色，例如身份键、状态字段、时间字段、维度字段、度量字段、关联键。 对一个问题输出可复核 JSON，前端页面也可以展示 LinkAlign 增强结果。 批量跑 100 条以上问题，生成可追溯的 JSON 实验结果。 可选启用 DeepSeek，让模型参与语义审计和候选过滤。 它还不能稳定做到： 自动生成最终生产 SQL 并保证执行正确。 自动判断所有 join 路径。 自动发现召回阶段完全没有进入候选集的正确表。 替代人工对标准字典和 gold 期望表的审核。 12. 后续优化建议 优先级从高到低： 修召回层：把未命中的 53 条任务分组，补充标准字典 preferredTables、别名、旧表名映射。 建人工复核 gold：至少抽 50 条问题，人工标注“主表、关系表、辅助表、噪声表”，不要只标一个主表。 优化过度过滤：针对教学任务、组织架构、部门信息、人员基础信息增加专门规则。 引入 DataRiver 血缘：把逻辑表、结果表、来源表和 Hive 物理表关系并入候选排序。 LLM 分级启用：普通查询走规则版，低置信或高风险问题再启用 DeepSeek。 增加人工复核页：把 kept/rejected 、字段角色、doops 证据做成可勾选的审核表，用人工反馈反向更新字典。 加 SQL 草稿阶段：在 LinkAlign 结果稳定后，再让 SQL 生成器基于保留表和字段生成只读 SQL 草稿。 13. 实验产物 代码与脚本： 文件 作用 D:\AGENT\data-skill-schema-minerpro\mcp\src\linkalign-lite.js LinkAlign Lite 主流程 D:\AGENT\data-skill-schema-minerpro\mcp\evals\run-linkalign-lite-experiment.js 批量在线评测脚本 D:\AGENT\data-skill-schema-minerpro\mcp\package.json 新增 eval:linkalign-lite 命令 实验结果： 文件 说明 D:\AGENT\data-skill-schema-minerpro\mcp\evals\full-dictionary-eval.latest.json 100 条全量字典离线评测结果 D:\AGENT\data-skill-schema-minerpro\mcp\evals\linkalign-lite-experiment.latest.json 104 条 LinkAlign Lite + doops 在线评测结果 D:\AGENT\data-skill-schema-minerpro\mcp\evals\linkalign-lite-experiment.llm-sample.json 12 条 DeepSeek 辅助样本结果 验证结果： 1 2 3 4 5 npm run check 通过 npm run security:check 通过 npm run eval:full-dictionary 完成 100 条 npm run eval:linkalign-lite -- --limit 104 完成 104 条，失败 0 条 npm run eval:linkalign-lite -- --limit 12 --llm 完成 12 条，失败 0 条 14. 最终判断 LinkAlign 的思想可以用于本项目，而且适合放在“自然语言问询”和“SQL&#x2F;数据查询”之间，作为 schema linking 中间层。 本次实验说明它已经能解决一个很实际的问题：用户问一个业务问题时，系统不再只是返回一堆相似表，而是能把候选表压缩、解释为什么保留或剔除，并给出关键字段角色。它的短板也很清楚：召回层还不够全，规则过滤有误伤，gold 标注需要更贴近真实业务问法。 所以目前最稳妥的落地方式是： 1 2 3 4 标准字典召回候选 -> doops 在线元数据验证 -> LinkAlign Lite 过滤和字段抽取 -> 人工复核或 SQL 生成器使用 不要直接把它当成“自动 SQL 正确率已经解决”的模块。它现在解决的是“先找对表、少给噪声、解释字段”的问题，这是后续做可靠问询和自动 SQL 的前置条件。]]></content>
+        
+      
+      
+      <categories>
+          
+          <category> 实验 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 数据中台 </tag>
+            
+            <tag> DataEngine </tag>
+            
+            <tag> 数据治理 </tag>
+            
+            <tag> 实验 </tag>
+            
+            <tag> Schema Linking </tag>
+            
+            <tag> LinkAlign </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>TAG：SQL 查数之后，还要会解释</title>
       <link href="/2026/06/03/PaperReadings/tag/"/>
       <url>/2026/06/03/PaperReadings/tag/</url>
@@ -57,9 +94,9 @@
       
         <tags>
             
-            <tag> LLM </tag>
-            
             <tag> DataEngine </tag>
+            
+            <tag> LLM </tag>
             
             <tag> 论文解读 </tag>
             
@@ -162,13 +199,13 @@
       
         <tags>
             
-            <tag> LLM </tag>
-            
             <tag> DataEngine </tag>
             
-            <tag> 论文解读 </tag>
+            <tag> LLM </tag>
             
             <tag> Schema Linking </tag>
+            
+            <tag> 论文解读 </tag>
             
             <tag> Text-to-SQL </tag>
             
@@ -199,9 +236,9 @@
             
             <tag> DataEngine </tag>
             
-            <tag> 论文解读 </tag>
-            
             <tag> Schema Linking </tag>
+            
+            <tag> 论文解读 </tag>
             
             <tag> Text-to-SQL </tag>
             
