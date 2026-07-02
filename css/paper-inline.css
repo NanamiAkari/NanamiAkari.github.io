@@ -4266,22 +4266,54 @@ body.has-paper-article #article-container{overflow:visible;}
       }.paper-article-inline.paper-article-iq-products-observation .refs { columns: 1; }
     
 }
+body:has(.paper-article-iq-products-observation) {
+  background: #f6f8fb;
+}
+body:has(.paper-article-iq-products-observation) #web_bg,
+body:has(.paper-article-iq-products-observation) #page-header,
+body:has(.paper-article-iq-products-observation) #nav,
+body:has(.paper-article-iq-products-observation) #footer,
+body:has(.paper-article-iq-products-observation) .post-copyright,
+body:has(.paper-article-iq-products-observation) .tag_share,
+body:has(.paper-article-iq-products-observation) .pagination-post,
+body:has(.paper-article-iq-products-observation) .relatedPosts,
+body:has(.paper-article-iq-products-observation) #post-comment,
+body:has(.paper-article-iq-products-observation) #post > .custom-hr {
+  display: none !important;
+}
+body:has(.paper-article-iq-products-observation) #content-inner.layout {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+body:has(.paper-article-iq-products-observation) #post {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+body:has(.paper-article-iq-products-observation) #article-container {
+  margin: 0 !important;
+  padding: 0 !important;
+  line-height: inherit;
+}
 .paper-article-inline.paper-article-iq-products-observation {
-  overflow: hidden;
-  border-radius: 8px;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: #f6f8fb;
 }
 .paper-article-inline.paper-article-iq-products-observation .layout {
-  width: 100%;
-}
-.paper-article-inline.paper-article-iq-products-observation .hero {
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-}
-.paper-article-inline.paper-article-iq-products-observation section {
-  margin: 0;
-  border-radius: 0;
-  background: transparent;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 @media (max-width: 900px) {
   .paper-article-inline.paper-article-iq-products-observation .layout {
